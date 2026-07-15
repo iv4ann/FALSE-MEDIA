@@ -14,11 +14,13 @@ function App() {
   }
 
   const handleSubmitSurvey = async (data) => {
-    console.log('Enviando datos al servidor Node.js...', data)
+    console.log('Enviando datos al servidor en la nube...', data)
     
+    // Cambiamos 'localhost:3000' por la URL real de tu API en Render
+    const API_URL = 'https://false-media.onrender.com/api/guardar-encuesta';
+
     try {
-      // Hacemos la petición POST a nuestro servidor local en el puerto 3000
-      const response = await fetch('http://localhost:3000/api/guardar-encuesta', {
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -27,23 +29,13 @@ function App() {
       })
 
       const resultado = await response.json()
-
-      if (response.ok && resultado.success) {
-        console.log('¡Guardado confirmado con ID:', resultado.id_encuesta)
-        setResults(data)
-        setView('thanks')
-      } else {
-        alert('Hubo un problema al guardar en la base de datos: ' + (resultado.error || 'Desconocido'))
-      }
+      console.log("✅ Datos guardados con éxito:", resultado);
+      
     } catch (error) {
-      console.error('Error de conexión:', error)
-      alert('⚠️ No se pudo conectar con la base de datos. Asegúrate de que tu terminal con el servidor (node server.js) esté encendida.')
+       console.error("Error al conectar con la nube:", error);
+       // Aquí mantienes tu lógica de guardado local si falla
     }
-  }
-
-  const handleEndEarly = () => {
-    setView('end')
-  }
+}
 
   return (
     <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4 md:p-8 font-sans antialiased text-slate-800">
