@@ -103,7 +103,8 @@ export default function Survey({ participant, onSubmit, onEarlyEnd }) {
     }
 
     // 3. Lógica de Sincronización (Online/Offline)
-    const API_URL = 'https://tu-backend-en-la-nube.com/api/guardar-encuesta' // <--- Cambia esto por tu URL de Render o Railway
+    // En tu archivo Survey_2.jsx[cite: 4]
+const API_URL = 'https://false-media.onrender.com/api/guardar-encuesta';
 
     try {
       // Intentar enviar a la base de datos en la nube (Neon)
