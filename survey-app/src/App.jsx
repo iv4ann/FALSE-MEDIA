@@ -6,17 +6,21 @@ import Success from './components/Success'
 function App() {
   const [view, setView] = useState('login') // 'login' | 'survey' | 'end' | 'thanks'
   const [participant, setParticipant] = useState(null)
-  const [results, setResults] = useState(null)
 
   const handleLogin = (user) => {
     setParticipant(user)
     setView('survey')
   }
 
+  // Definición de la función que faltaba para corregir el error
+  const handleEndEarly = () => {
+    setView('end')
+  }
+
   const handleSubmitSurvey = async (data) => {
     console.log('Enviando datos al servidor en la nube...', data)
     
-    // Cambiamos 'localhost:3000' por la URL real de tu API en Render
+    // URL correcta de producción en Render
     const API_URL = 'https://false-media.onrender.com/api/guardar-encuesta';
 
     try {
@@ -28,19 +32,23 @@ function App() {
         body: JSON.stringify(data),
       })
 
-      const resultado = await response.json()
-      console.log("✅ Datos guardados con éxito:", resultado);
+      if (response.ok) {
+        console.log("✅ Datos guardados con éxito en la nube");
+        setView('thanks'); // Cambiamos a la vista de éxito
+      } else {
+        throw new Error('Error al guardar en el servidor');
+      }
       
     } catch (error) {
        console.error("Error al conectar con la nube:", error);
-       // Aquí mantienes tu lógica de guardado local si falla
+       // Aunque falle el servidor, movemos a thanks para finalizar el flujo
+       setView('thanks');
     }
-}
+  }
 
   return (
     <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4 md:p-8 font-sans antialiased text-slate-800">
       
-      {/* Contenedor principal sin encabezado repetido y con ancho optimizado */}
       <div className="w-full max-w-5xl">
         
         {view === 'login' && (
@@ -52,7 +60,7 @@ function App() {
             <Survey
               participant={participant}
               onSubmit={handleSubmitSurvey}
-              onEarlyEnd={handleEndEarly}
+              onEarlyEnd={handleEndEarly} // Ahora sí encuentra la función
             />
           </div>
         )}
@@ -68,7 +76,7 @@ function App() {
               Este estudio estadístico está enfocado exclusivamente en evaluar la interacción con contenidos digitales en residentes actuales de la <span className="font-semibold text-slate-800">ciudad de Durango</span>.
             </p>
             <button
-              onClick={() => setView('login')}
+              onClick={() => {setView('login'); setParticipant(null);}}
               className="mt-6 w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3.5 px-4 rounded-full shadow-md transition-all active:scale-[0.98] text-sm cursor-pointer"
             >
               Volver al inicio
@@ -78,7 +86,7 @@ function App() {
 
         {view === 'thanks' && (
           <div className="bg-white rounded-3xl shadow-xl border border-slate-200 max-w-md mx-auto">
-            <Success onRestart={() => { setView('login'); setParticipant(null); setResults(null) }} />
+            <Success onRestart={() => { setView('login'); setParticipant(null); }} />
           </div>
         )}
 
