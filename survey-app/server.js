@@ -8,12 +8,7 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-// ==========================================
-// CONFIGURACIÓN DE TU POSTGRESQL LOCAL
-// ==========================================
-// ==========================================
-// CONFIGURACIÓN DE TU POSTGRESQL EN LA NUBE (NEON)
-// ==========================================
+
 const pool = new Pool({
   connectionString: 'postgresql://neondb_owner:npg_NGFPL0MQHI6B@ep-noisy-night-adw9z0s4-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
   ssl: {
