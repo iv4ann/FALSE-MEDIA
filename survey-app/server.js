@@ -1,4 +1,4 @@
-import express from 'express'
+ import express from 'express'
 import cors from 'cors'
 import pg from 'pg'
 
@@ -32,11 +32,10 @@ app.post('/api/guardar-encuesta', async (req, res) => {
   const client = await pool.connect()
 
   try {
-    // Usamos una TRANSACCIÓN (BEGIN/COMMIT) para que si falla una tabla, se cancele todo y no queden datos corruptos
     await client.query('BEGIN')
 
     const reside = datos.resideEnDurango === 'si'
-    const idEdad = mapaEdades[datos.item2_edad] || 2 // Por defecto 2 (Jóvenes) si no coincide
+    const idEdad = mapaEdades[datos.item2_edad] || 2 
 
     // 1. Insertar en la tabla principal: encuestas
     const queryEncuesta = `
@@ -108,7 +107,6 @@ app.post('/api/guardar-encuesta', async (req, res) => {
 
 
 
-// POR ESTO:
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Servidor en la nube escuchando en el puerto ${PORT}`);
