@@ -53,13 +53,19 @@ const LikertRow = ({ label, desc, value, onChange, opcionesTextos }) => {
 }
 const MediaChallengeCard = ({ label, desc, mediaType, mediaUrl, value, onChange, esIA, explicacion }) => {
   
-  // 1. Agregamos un estado para saber si intentó cambiar su respuesta
-  const [intentoCambio, setIntentoCambio] = React.useState(false); // O solo useState(false) si ya lo importaste
+  // Estado para saber si intentó cambiar su respuesta
+  const [intentoCambio, setIntentoCambio] = React.useState(false); 
 
   const handleVerifyingClick = (opcion) => {
     if (value) {
-      // 2. Si ya hay respuesta, mostramos el mensaje de abajo y cortamos la función
+      // Activamos el mensaje
       setIntentoCambio(true);
+      
+      // A los 5 segundos cambiamos el estado, lo que activará el desvanecimiento CSS
+      setTimeout(() => {
+        setIntentoCambio(false);
+      }, 5000);
+
       return;
     }
     // Si no hay respuesta, la guardamos
@@ -146,12 +152,16 @@ const MediaChallengeCard = ({ label, desc, mediaType, mediaUrl, value, onChange,
         </div>
       )}
 
-      {/* 3. Mensaje de advertencia si intenta hacer clic de nuevo */}
-      {intentoCambio && (
-        <div className="mt-2 p-3 bg-red-50 border border-red-200 text-red-600 text-xs font-semibold rounded-lg text-center animate-pulse">
+      {/* Mensaje de advertencia con transición de desvanecimiento */}
+      <div 
+        className={`transition-all duration-700 ease-in-out overflow-hidden ${
+          intentoCambio ? 'max-h-32 opacity-100 mt-2' : 'max-h-0 opacity-0 mt-0'
+        }`}
+      >
+        <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-xs font-semibold rounded-lg text-center">
           🛑 ¡Alto ahí, pa! Ya elegiste tu respuesta para este reto y no se puede modificar.
         </div>
-      )}
+      </div>
 
     </div>
   );
