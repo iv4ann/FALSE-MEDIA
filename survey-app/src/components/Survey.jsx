@@ -52,6 +52,20 @@ const LikertRow = ({ label, desc, value, onChange, opcionesTextos }) => {
   )
 }
 const MediaChallengeCard = ({ label, desc, mediaType, mediaUrl, value, onChange, esIA, explicacion }) => {
+  
+  // 1. Agregamos un estado para saber si intentó cambiar su respuesta
+  const [intentoCambio, setIntentoCambio] = React.useState(false); // O solo useState(false) si ya lo importaste
+
+  const handleVerifyingClick = (opcion) => {
+    if (value) {
+      // 2. Si ya hay respuesta, mostramos el mensaje de abajo y cortamos la función
+      setIntentoCambio(true);
+      return;
+    }
+    // Si no hay respuesta, la guardamos
+    onChange(opcion);
+  };
+
   return (
     <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4 text-left">
       <div>
@@ -74,7 +88,6 @@ const MediaChallengeCard = ({ label, desc, mediaType, mediaUrl, value, onChange,
             <source src={mediaUrl} type="video/mp4" />
             Tu navegador no soporta la reproducción de este video.
           </video>
-          
         )}
         {mediaType === 'audio' && (
           <div className="w-full p-6 flex flex-col items-center justify-center bg-slate-900">
@@ -92,18 +105,26 @@ const MediaChallengeCard = ({ label, desc, mediaType, mediaUrl, value, onChange,
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
-            onClick={() => onChange('IA')}
-            className={`py-2.5 px-4 rounded-lg font-medium text-sm border transition-all ${
-              value === 'IA' ? 'bg-purple-600 text-white border-purple-600' : 'bg-slate-50 text-slate-700 border-slate-200'
+            onClick={() => handleVerifyingClick('IA')}
+            className={`py-2.5 px-4 rounded-lg font-medium text-sm border transition-all cursor-pointer ${
+              value === 'IA' 
+                ? 'bg-purple-600 text-white border-purple-600' 
+                : value 
+                  ? 'bg-slate-100 text-slate-400 border-slate-200 opacity-70' 
+                  : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
             }`}
           >
             🤖 Generado por IA
           </button>
           <button
             type="button"
-            onClick={() => onChange('REAL')}
-            className={`py-2.5 px-4 rounded-lg font-medium text-sm border transition-all ${
-              value === 'REAL' ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-50 text-slate-700 border-slate-200'
+            onClick={() => handleVerifyingClick('REAL')}
+            className={`py-2.5 px-4 rounded-lg font-medium text-sm border transition-all cursor-pointer ${
+              value === 'REAL' 
+                ? 'bg-blue-600 text-white border-blue-600' 
+                : value 
+                  ? 'bg-slate-100 text-slate-400 border-slate-200 opacity-70' 
+                  : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
             }`}
           >
             📷 Real / Humano
@@ -124,6 +145,14 @@ const MediaChallengeCard = ({ label, desc, mediaType, mediaUrl, value, onChange,
           <p className="text-slate-700"><strong>¿Cómo identificarlo?:</strong> {explicacion}</p>
         </div>
       )}
+
+      {/* 3. Mensaje de advertencia si intenta hacer clic de nuevo */}
+      {intentoCambio && (
+        <div className="mt-2 p-3 bg-red-50 border border-red-200 text-red-600 text-xs font-semibold rounded-lg text-center animate-pulse">
+          🛑 ¡Alto ahí, pa! Ya elegiste tu respuesta para este reto y no se puede modificar.
+        </div>
+      )}
+
     </div>
   );
 };
@@ -153,12 +182,16 @@ export default function Survey({ participant, onSubmit, onEarlyEnd }) {
     item15_reemplazo_laboral: null,
     // AQUÍ PUEDES AGREGAR TUS NUEVAS VARIABLES PARA LA ENCUESTA 2 (Ejemplo: item16_ejemplo: null)
     item16_imagenes: null,
-    item17_videos: null,
-    item18_audio: null,
-    item19_audio: null,
-    item20_audio: null,
-    item21_audio: null,
-    item22_audio: null,
+    item17_imagenes: null,
+    item18_imagenes: null,
+    item19_noticias: null,
+    item20_noticias: null,
+    item21_videos: null,
+    item22_videos: null,
+    item23_videos: null,
+    item24_audio: null,
+    item25_audio: null,
+    item26_audio: null,
   })
 
   const handleLikertChange = (key, val) => {
@@ -531,7 +564,7 @@ export default function Survey({ participant, onSubmit, onEarlyEnd }) {
                 </p>
               </div>
             <MediaChallengeCard
-                  label="● Ítem 16. ¿Es IA o no pa?"
+                  label="● Ítem 16. Messi anotando un gol."
                   mediaType="image"
                   mediaUrl="/messi.jpg"
                   value={respuestas.item16_imagenes}
@@ -540,42 +573,97 @@ export default function Survey({ participant, onSubmit, onEarlyEnd }) {
                   explicacion="Si es IA, si te fijas bien los jugadores de Espana tienen todos el mismo numero."
                 />
               <MediaChallengeCard
-                 label="● Ítem 17. ¿Es IA o no pa?"
+                 label="● Ítem 17. Paisaje nublado."
                   mediaType="image"
                   mediaUrl="/everest.jpg"
-                  value={respuestas.item16_imagenes}
-                  onChange={(val) => handleLikertChange('item16_imagenes', val)}
+                  value={respuestas.item17_imagenes}
+                  onChange={(val) => handleLikertChange('item17_imagenes', val)}
                   esIA={true}//si es IA pa
                   explicacion="Si es IA, si te fijas bien los jugadores de Espana tienen todos el mismo numero."
                 />
+                 <MediaChallengeCard
+                 label="● Ítem 18. Elvis en un acantilado."
+                  mediaType="image"
+                  mediaUrl="/a274e7eb-7874-447f-8160-2b92c0eb56a6.jpeg"
+                  value={respuestas.item18_imagenes}
+                  onChange={(val) => handleLikertChange('item18_imagenes', val)}
+                  esIA={true}//si es IA pa
+                  explicacion="Si es IA, si te fijas bien los jugadores de Espana tienen todos el mismo numero."
+                />
+               
                <MediaChallengeCard
-                  label="● Ítem 18. ¿Es IA o no pa?"
+                  label="● Ítem 19. Noticia del Papa Francisco I."
+                  mediaType="image"
+                  mediaUrl="/Captura de pantalla 2026-07-22 225643.jpg"
+                  value={respuestas.item19_noticias}
+                  onChange={(val) => handleLikertChange('item19_noticias', val)}
+                  esIA={true}   
+                  explicacion="No manches pa se ve luego luego."
+                />
+                <MediaChallengeCard
+                  label="● Ítem 20. Noticia de Meteorito que cayo en Nueva Jersey."
+                  mediaType="image"
+                  mediaUrl="/noticia1.png"
+                  value={respuestas.item20_noticias}
+                  onChange={(val) => handleLikertChange('item20_noticias', val)}
+                  esIA={true}   
+                  explicacion="No manches pa se ve luego luego."
+                />
+                <MediaChallengeCard
+                  label="● Ítem 21. Caricatura de los 70s."
                   mediaType="video"
-                  mediaUrl="/chainsaw_man_video.mp4"
-                  value={respuestas.item17_videos}
-                  onChange={(val) => handleLikertChange('item17_videos', val)}
+                  mediaUrl="Attack on Titan – If it was made in 1970! [t12Uzr3OL-Q].mp4"
+                  value={respuestas.item21_videos}
+                  onChange={(val) => handleLikertChange('item21_videos', val)}
+                  esIA={true}   
+                  explicacion="No manches pa se ve luego luego."
+                />
+                <MediaChallengeCard
+                  label="● Ítem 22. Gordon Ramsay en Minecraft."
+                  mediaType="video"
+                  mediaUrl="/The Better Minecraft Movie [HFkr74Xy1Y4].mp4"
+                  value={respuestas.item22_videos}
+                  onChange={(val) => handleLikertChange('item22_videos', val)}
+                  esIA={true}   
+                  explicacion="No manches pa se ve luego luego."
+                />
+                <MediaChallengeCard
+                  label="● Ítem 23. Pelicula Retro."
+                  mediaType="video"
+                  mediaUrl="/CRAFT (1979)： The First Night ｜ Episode 1 [zX-e9LRR_ko].mp4"
+                  value={respuestas.item23_videos}
+                  onChange={(val) => handleLikertChange('item23_videos', val)}
                   esIA={true}   
                   explicacion="No manches pa se ve luego luego."
                 />
                <MediaChallengeCard
-                  label="● Ítem 19. ¿Es IA o no pa?"
+                  label="● Ítem 24. Audio 1."
                   mediaType="audio"
                   mediaUrl="/Gangsta’s Paradise - 1950's Soul Version - Soul'd Out (128k).mp3"
-                  value={respuestas.item19_audio}
-                  onChange={(val) => handleLikertChange('item19_audio', val)}
+                  value={respuestas.item24_audio}
+                  onChange={(val) => handleLikertChange('item24_audio', val)}
                   esIA={true}   
                   explicacion="No manches pa se ve luego luego."
                 /> 
                 
                <MediaChallengeCard
-                  label="● Ítem 19. ¿Es IA o no pa?"
+                  label="● Ítem 25. Audio 2."
                   mediaType="audio"
                   mediaUrl="/Foster The People - Houdini (Official Video) - FosterThePeople (128k).mp3"
-                  value={respuestas.item19_audio}
-                  onChange={(val) => handleLikertChange('item19_audio', val)}
+                  value={respuestas.item25_audio}
+                  onChange={(val) => handleLikertChange('item25_audio', val)}
                   esIA={true}   
                   explicacion="No manches pa se ve luego luego."
                 /> 
+                <MediaChallengeCard
+                  label="● Ítem 26. Audio 3."
+                  mediaType="audio"
+                  mediaUrl="Shaggy - It Wasn't Me (Country AI Version) [OD-Edp2BlsQ].mp3"
+                  value={respuestas.item26_audio}
+                  onChange={(val) => handleLikertChange('item26_audio', val)}
+                  esIA={true}   
+                  explicacion="No manches pa se ve luego luego."
+                />
               {/* ---> AQUÍ VAS A AGREGAR TUS NUEVOS COMPONENTES LikertRow O INPUTS <--- */}
               
               
