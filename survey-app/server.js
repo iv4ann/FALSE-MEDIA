@@ -1,3 +1,12 @@
+import express from 'express'
+import cors from 'cors'
+import pg from 'pg'
+
+const app = express() // 👈 Primero se declara la app siempre
+app.use(cors())
+app.use(express.json())
+
+// Y después ya puedes usar app.post(...) o tus rutas
 // ==========================================
 // RUTA API: RECIBIR Y GUARDAR LA ENCUESTA
 // ==========================================
