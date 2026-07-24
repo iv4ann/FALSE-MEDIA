@@ -10,13 +10,13 @@ app.use(express.json())
 
 // 1. CONEXIÓN A TU BASE DE DATOS PRINCIPAL (Bloques 1, 2 y 3)
 const poolPrincipal = new Pool({
-  connectionString: 'TU_URL_DE_NEON_PRINCIPAL_AQUI', // ej: termina en /neondb
+  connectionString: 'postgresql://neondb_owner:npg_NGFPL0MQHI6B@ep-noisy-night-adw9z0s4-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
   ssl: { rejectUnauthorized: false }
 })
 
-// 2. CONEXIÓN A TU NUEVA BASE DE DATOS (Bloque 4)
+// 2. CONEXIÓN A TU NUEVA BASE DE DATOS (Bloque 4 - Multimedia)
 const poolMultimedia = new Pool({
-  connectionString: 'TU_URL_DE_NEON_MULTIMEDIA_AQUI', // ej: termina en /bloque_multimedia
+  connectionString: 'postgresql://neondb_owner:npg_NGFPL0MQHI6B@ep-noisy-night-adw9z0s4-pooler.c-2.us-east-1.aws.neon.tech/bloque_multimedia?sslmode=require&channel_binding=require',
   ssl: { rejectUnauthorized: false }
 })
 
