@@ -12,7 +12,12 @@ app.use(express.json())
 // ==========================================
 app.post('/api/guardar-encuesta', async (req, res) => {
   const datos = req.body
+  
+  // 👇 Agrega esto para ver la radiografía de los datos
+  console.log("📦 ESTO MANDA REACT:", datos); 
+
   const client = await pool.connect()
+  // ... resto del código
 
   try {
     await client.query('BEGIN')
