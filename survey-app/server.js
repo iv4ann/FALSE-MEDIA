@@ -108,3 +108,10 @@ app.post('/api/guardar-encuesta', async (req, res) => {
     client.release() // Soltamos la conexión principal
   }
 })
+// Este es el puerto que Render te asignará automáticamente
+const PORT = process.env.PORT || 3000;
+
+// Esta instrucción es la que mantiene "despierta" a tu aplicación
+app.listen(PORT, () => {
+  console.log(`🚀 Jarvis en línea: Servidor corriendo al cien en el puerto ${PORT}`);
+});
