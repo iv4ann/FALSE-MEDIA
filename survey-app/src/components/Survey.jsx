@@ -107,7 +107,7 @@ const MediaChallengeCard = ({ label, desc, mediaType, mediaUrl, value, onChange,
 
       {/* Botones de Selección */}
       <div>
-        <span className="block text-xs font-bold text-slate-400 uppercase mb-2">¿Cuál es tu veredicto?</span>
+        <span className="block text-xs font-bold text-slate-400 uppercase mb-2">Elige una respuesta</span>
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
@@ -120,7 +120,7 @@ const MediaChallengeCard = ({ label, desc, mediaType, mediaUrl, value, onChange,
                   : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
             }`}
           >
-            🤖 Generado por IA
+            Generado por IA
           </button>
           <button
             type="button"
@@ -133,7 +133,7 @@ const MediaChallengeCard = ({ label, desc, mediaType, mediaUrl, value, onChange,
                   : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
             }`}
           >
-            📷 Real / Humano
+            Real
           </button>
         </div>
       </div>
@@ -146,7 +146,7 @@ const MediaChallengeCard = ({ label, desc, mediaType, mediaUrl, value, onChange,
             : 'bg-amber-50 border-amber-200 text-amber-900'
         }`}>
           <div className="font-bold mb-1 text-sm">
-            {(value === 'IA' && esIA) || (value === 'REAL' && !esIA) ? '✅ ¡Correcto!' : '⚠️ Dato curioso:'}
+            {(value === 'IA' && esIA) || (value === 'REAL' && !esIA) ? 'Correcto' : ' Incorrecto'}
           </div>
           <p className="text-slate-700"><strong>¿Cómo identificarlo?:</strong> {explicacion}</p>
         </div>
@@ -159,7 +159,7 @@ const MediaChallengeCard = ({ label, desc, mediaType, mediaUrl, value, onChange,
         }`}
       >
         <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-xs font-semibold rounded-lg text-center">
-          🛑 ¡Alto ahí, pa! Ya elegiste tu respuesta para este reto y no se puede modificar.
+           No se puede modificar la respuesta
         </div>
       </div>
 
@@ -580,7 +580,8 @@ export default function Survey({ participant, onSubmit, onEarlyEnd }) {
                   value={respuestas.item16_imagenes}
                   onChange={(val) => handleLikertChange('item16_imagenes', val)}
                   esIA={true}//si es IA pa
-                  explicacion="Si es IA, si te fijas bien los jugadores de Espana tienen todos el mismo numero."
+                  explicacion="Al observar mas de cerca a los jugadores de Espana, todos tienen el numero 5 como 
+                  tambien la red no esta generada bien en la imagen."
                 />
               <MediaChallengeCard
                  label="● Ítem 17. Paisaje nublado."
@@ -588,8 +589,8 @@ export default function Survey({ participant, onSubmit, onEarlyEnd }) {
                   mediaUrl="/everest.jpg"
                   value={respuestas.item17_imagenes}
                   onChange={(val) => handleLikertChange('item17_imagenes', val)}
-                  esIA={true}//si es IA pa
-                  explicacion="Si es IA, si te fijas bien los jugadores de Espana tienen todos el mismo numero."
+                  esIA={false}//si es IA pa
+                  explicacion="No es IA, las proporciones de las nubes son reales."
                 />
                  <MediaChallengeCard
                  label="● Ítem 18. Elvis en un acantilado."
@@ -598,7 +599,7 @@ export default function Survey({ participant, onSubmit, onEarlyEnd }) {
                   value={respuestas.item18_imagenes}
                   onChange={(val) => handleLikertChange('item18_imagenes', val)}
                   esIA={true}//si es IA pa
-                  explicacion="Si es IA, si te fijas bien los jugadores de Espana tienen todos el mismo numero."
+                  explicacion="Si es IA, Elvis y la valla se ven sobrepuestos con respecto al paisaje."
                 />
                
                <MediaChallengeCard
@@ -608,7 +609,8 @@ export default function Survey({ participant, onSubmit, onEarlyEnd }) {
                   value={respuestas.item19_noticias}
                   onChange={(val) => handleLikertChange('item19_noticias', val)}
                   esIA={true}   
-                  explicacion="No manches pa se ve luego luego."
+                  explicacion="Si es IA, aunque en un principio parece real si pones atencion 
+                  las texturas de la chamarra no se ven bien."
                 />
                 <MediaChallengeCard
                   label="● Ítem 20. Noticia de Meteorito que cayo en Nueva Jersey."
@@ -616,8 +618,8 @@ export default function Survey({ participant, onSubmit, onEarlyEnd }) {
                   mediaUrl="/noticia1.png"
                   value={respuestas.item20_noticias}
                   onChange={(val) => handleLikertChange('item20_noticias', val)}
-                  esIA={true}   
-                  explicacion="No manches pa se ve luego luego."
+                  esIA={false}   
+                  explicacion="No es IA, en este tipo de noticias es importante verificar la fuente."
                 />
                 <MediaChallengeCard
                   label="● Ítem 21. Caricatura de los 70s."
@@ -634,7 +636,7 @@ export default function Survey({ participant, onSubmit, onEarlyEnd }) {
                   mediaUrl="/The Better Minecraft Movie [HFkr74Xy1Y4].mp4"
                   value={respuestas.item22_videos}
                   onChange={(val) => handleLikertChange('item22_videos', val)}
-                  esIA={true}   
+                  esIA={false}   
                   explicacion="No manches pa se ve luego luego."
                 />
                 <MediaChallengeCard
@@ -662,7 +664,7 @@ export default function Survey({ participant, onSubmit, onEarlyEnd }) {
                   mediaUrl="/Foster The People - Houdini (Official Video) - FosterThePeople (128k).mp3"
                   value={respuestas.item25_audio}
                   onChange={(val) => handleLikertChange('item25_audio', val)}
-                  esIA={true}   
+                  esIA={false}   
                   explicacion="No manches pa se ve luego luego."
                 /> 
                 <MediaChallengeCard
@@ -674,7 +676,7 @@ export default function Survey({ participant, onSubmit, onEarlyEnd }) {
                   esIA={true}   
                   explicacion="No manches pa se ve luego luego."
                 />
-              {/* ---> AQUÍ VAS A AGREGAR TUS NUEVOS COMPONENTES LikertRow O INPUTS <--- */}
+              
               
               
               
@@ -686,7 +688,7 @@ export default function Survey({ participant, onSubmit, onEarlyEnd }) {
                 type="submit"
                 className="w-full sm:w-auto py-4 px-12 rounded-full font-extrabold text-sm bg-gradient-to-r from-slate-900 to-slate-800 hover:from-slate-950 hover:to-slate-900 text-white shadow-xl shadow-slate-900/10 hover:shadow-2xl transform active:scale-[0.98] transition-all duration-200 cursor-pointer"
               >
-                Registrar Todas las Respuestas y Concluir ✨
+                Registrar Todas las Respuestas y Concluir
               </button>
             </div>
 

@@ -1,29 +1,3 @@
- import express from 'express'
-import cors from 'cors'
-import pg from 'pg'
-
-const { Pool } = pg
-
-const app = express()
-app.use(cors())
-app.use(express.json())
-
-
-const pool = new Pool({
-  connectionString: 'postgresql://neondb_owner:npg_NGFPL0MQHI6B@ep-noisy-night-adw9z0s4-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
-  ssl: {
-    rejectUnauthorized: false // Requerido para conexiones seguras en Neon
-  }
-})
-
-// Mapeo para convertir el texto de React al ID numérico de tu tabla cat_rangos_edad
-const mapaEdades = {
-  '3 a 12 años (Niño - Con apoyo de tutor)': 1,
-  '13 a 29 años (Jóvenes)': 2,
-  '30 a 59 años (Adultos)': 3,
-  '60 a 70 años (Adultos Mayores)': 4,
-}
-
 // ==========================================
 // RUTA API: RECIBIR Y GUARDAR LA ENCUESTA
 // ==========================================
@@ -87,6 +61,28 @@ app.post('/api/guardar-encuesta', async (req, res) => {
         datos.item14_privacidad_datos,
         datos.item15_reemplazo_laboral,
       ])
+
+      // 👇 NUEVO: Guardar Bloque IV (Multimedia) 👇
+      const queryB4 = `
+        INSERT INTO respuestas_multimedia 
+        (id_encuesta, item16_imagenes, item17_imagenes, item18_imagenes, item19_noticias, item20_noticias, item21_videos, item22_videos, item23_videos, item24_audio, item25_audio, item26_audio)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);
+      `
+      await client.query(queryB4, [
+        idEncuestaGenerado,
+        datos.item16_imagenes,
+        datos.item17_imagenes,
+        datos.item18_imagenes,
+        datos.item19_noticias,
+        datos.item20_noticias,
+        datos.item21_videos,
+        datos.item22_videos,
+        datos.item23_videos,
+        datos.item24_audio,
+        datos.item25_audio,
+        datos.item26_audio
+      ])
+      // 👆 FIN DE LO NUEVO 👆
     }
 
     // Confirmar y guardar permanentemente en la base de datos
@@ -104,10 +100,3 @@ app.post('/api/guardar-encuesta', async (req, res) => {
     client.release()
   }
 })
-
-
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Servidor en la nube escuchando en el puerto ${PORT}`);
-});
