@@ -23,7 +23,7 @@ const poolPrincipal = new Pool({
 
 // 2. CONEXIÓN A TU NUEVA BASE DE DATOS (Bloque 4 - Multimedia)
 const poolMultimedia = new Pool({
-  connectionString: 'postgresql://neondb_owner:npg_NGFPL0MQHI6B@ep-noisy-night-adw9z0s4-pooler.c-2.us-east-1.aws.neon.tech/bloque_multimedia?sslmode=require&channel_binding=require',
+  connectionString: 'postgresql://neondb_owner:npg_mtFT5K2DVQvA@ep-shiny-boat-axjw0w6g-pooler.c-4.us-east-2.aws.neon.tech/multimedia?sslmode=require&channel_binding=require',
   ssl: { rejectUnauthorized: false }
 })
 
