@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Messi } from "./Messi"; 
+import { Messi } from "./messi";
 import Videos from "./Videos";
 import Noticias from "./Noticias";
 import Audios from "./Audios";
@@ -18,7 +18,7 @@ import polygon6 from "../assets/Polygon 6.svg";
 import rectangle6 from "../assets/Rectangle 6.svg";
 import rectangle9 from "../assets/Rectangle 9.svg";
 import rectangle10 from "../assets/Rectangle 10.svg";
-import unsplashEzen4Jyrvyq from "../assets/unsplash_eZen4JyrVYQ.png";
+import unsplashEzen4Jyrvyq from "../assets/unsplash_ezEn4jyrVYQ.png";
 
 const navigationItems = [
   { label: "Videos", icon: polygon5 },
