@@ -8,7 +8,7 @@ const app = express()
 
 // Bloqueamos el paso a curiosos: Solo Vercel puede hablar con este backend
 app.use(cors({
-  origin: 'https://falsemedia-6u0lsj8ju-false-media.vercel.app', 
+  origin: 'https://falsemedia-5cf9o5q9f-false-media.vercel.app', 
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true 
 }))
