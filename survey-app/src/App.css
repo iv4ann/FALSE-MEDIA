@@ -1,3 +1,10 @@
+.font-vt323 {
+  font-family: 'VT323', monospace;
+}
+
+.font-silkscreen {
+  font-family: 'Silkscreen', sans-serif;
+}
 .counter {
   font-size: 16px;
   padding: 5px 10px;

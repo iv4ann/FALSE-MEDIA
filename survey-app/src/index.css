@@ -1,1 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Silkscreen&family=VT323&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --font-vt323: "VT323", monospace;
+  --font-silkscreen: "Silkscreen", sans-serif;
+}

@@ -40,11 +40,10 @@ export default function Login({ onLogin }) {
               {/* Input 1: Correo / Institución */}
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5">
-                  Correo Electrónico o Matrícula <span className="text-slate-400 font-normal">(Opcional)</span>
+                  Correo Electrónico <span className="text-slate-400 font-normal"></span>
                 </label>
                 <input
                   type="text"
-                  placeholder="ejemplo@utd.edu.mx"
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent text-slate-800 text-sm transition bg-white placeholder-slate-300 shadow-sm"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -54,11 +53,10 @@ export default function Login({ onLogin }) {
               {/* Input 2: Nombre Completo */}
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5">
-                  Nombre Completo <span className="text-slate-400 font-normal">(Opcional)</span>
+                  Nombre Completo <span className="text-slate-400 font-normal"></span>
                 </label>
                 <input
                   type="text"
-                  placeholder="Ej. Martín"
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent text-slate-800 text-sm transition bg-white placeholder-slate-300 shadow-sm"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
