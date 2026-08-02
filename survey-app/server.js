@@ -2,15 +2,22 @@ import express from 'express'
 import cors from 'cors'
 import pg from 'pg'
 
-const { Pool } = pg // <-- Extraemos Pool de pg
+const { Pool } = pg 
 
 const app = express() 
-app.use(cors())
+
+// Bloqueamos el paso a curiosos: Solo Vercel puede hablar con este backend
+app.use(cors({
+  origin: 'https://falsemedia-6u0lsj8ju-false-media.vercel.app', 
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true 
+}))
+
 app.use(express.json())
 
-// 1. CONEXIÓN A TU BASE DE DATOS PRINCIPAL (Bloques 1, 2 y 3)
+// 1. CONEXIÓN A TU BASE DE DATOS PRINCIPAL (Actualizada con tu nuevo string de Neon)
 const poolPrincipal = new Pool({
-  connectionString: 'postgresql://neondb_owner:npg_NGFPL0MQHI6B@ep-noisy-night-adw9z0s4-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
+  connectionString: 'postgresql://neondb_owner:npg_mtFT5K2DVQvA@ep-shiny-boat-axjw0w6g-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
   ssl: { rejectUnauthorized: false }
 })
 
@@ -19,7 +26,6 @@ const poolMultimedia = new Pool({
   connectionString: 'postgresql://neondb_owner:npg_NGFPL0MQHI6B@ep-noisy-night-adw9z0s4-pooler.c-2.us-east-1.aws.neon.tech/bloque_multimedia?sslmode=require&channel_binding=require',
   ssl: { rejectUnauthorized: false }
 })
-
 
 app.post('/api/guardar-encuesta', async (req, res) => {
   const datos = req.body
@@ -31,7 +37,7 @@ app.post('/api/guardar-encuesta', async (req, res) => {
   try {
     await client.query('BEGIN')
 
-    // Mapa de edades (asumiendo que lo tienes definido arriba en tu archivo)
+    // Mapa de edades
     const mapaEdades = { "18-24": 1, "25-34": 2, "35-44": 3, "45-54": 4, "55+": 5 }
     const reside = datos.resideEnDurango === 'si'
     const idEdad = mapaEdades[datos.item2_edad] || 2 
@@ -95,7 +101,6 @@ app.post('/api/guardar-encuesta', async (req, res) => {
       ])
       console.log(`🎥 ¡Bloque 4 multimedia guardado con éxito!`)
     }
-    // 👆 FIN DE LO NUEVO 👆
     
     res.status(200).json({ success: true, id_encuesta: idEncuestaGenerado })
 
@@ -105,13 +110,13 @@ app.post('/api/guardar-encuesta', async (req, res) => {
     console.error('❌ Error al guardar en PostgreSQL:', error)
     res.status(500).json({ success: false, error: 'Error interno de base de datos' })
   } finally {
-    client.release() // Soltamos la conexión principal
+    client.release() 
   }
 })
+
 // Este es el puerto que Render te asignará automáticamente
 const PORT = process.env.PORT || 3000;
 
-// Esta instrucción es la que mantiene "despierta" a tu aplicación
 app.listen(PORT, () => {
   console.log(`🚀 Jarvis en línea: Servidor corriendo al cien en el puerto ${PORT}`);
 });
