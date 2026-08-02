@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import unsplashEzen4Jyrvyq from "../assets/unsplash_eZen4JyrVYQ.png"; // Ajusta la ruta si es necesario
+import unsplashEzen4Jyrvyq from "../assets/unsplash_ezEn4jYrVYQ.png";
 
 const noticiasData = [
   { id: 19, type: 'image', url: '/Captura de pantalla 2026-07-22 225643.jpg', thumb: '/Captura de pantalla 2026-07-22 225643.jpg', title: 'Noticia del Papa', isIA: true, desc: 'Ítem 19. Noticia del Papa Francisco I.', exp: 'Si es IA, aunque en un principio parece real si pones atencion las texturas de la chamarra no se ven bien.' },

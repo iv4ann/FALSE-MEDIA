@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import unsplashEzen4Jyrvyq from "../assets/unsplash_eZen4JyrVYQ.png";
+import unsplashEzen4Jyrvyq from "../assets/unsplash_ezEn4jYrVYQ.png";
 
 const videosData = [
   { id: 21, type: 'video', url: '/Attack on Titan – If it was made in 1970! [t12Uzr3OL-Q].mp4', thumb: '/everest.jpg', title: 'Caricatura 70s', isIA: true, desc: 'Ítem 21. Caricatura de los 70s.', exp: 'No manches pa se ve luego luego.' },

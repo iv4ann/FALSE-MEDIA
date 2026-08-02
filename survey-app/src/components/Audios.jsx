@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import unsplashEzen4Jyrvyq from "../assets/unsplash_eZen4JyrVYQ.png";
+import unsplashEzen4Jyrvyq from "../assets/unsplash_ezEn4jYrVYQ.png";
 
 const audiosData = [
   { id: 24, type: 'audio', url: '/Gangsta’s Paradise - 1950\'s Soul Version - Soul\'d Out (128k).mp3', thumb: '/a274e7eb-7874-447f-8160-2b92c0eb56a6.jpeg', title: 'Audio 1', isIA: true, desc: 'Ítem 24. Audio 1.', exp: 'No manches pa se ve luego luego.' },

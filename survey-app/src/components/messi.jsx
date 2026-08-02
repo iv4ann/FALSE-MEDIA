@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import unsplashEzen4Jyrvyq from "../assets/unsplash_eZen4JyrVYQ.png";
+import unsplashEzen4Jyrvyq from "../assets/unsplash_ezEn4jYrVYQ.png";
 
 const navigationItems = ["Imagenes", "Videos", "Noticias", "Audios"];
 
