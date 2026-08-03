@@ -7,8 +7,16 @@ const { Pool } = pg
 const app = express() 
 
 // Bloqueamos el paso a curiosos: Solo Vercel puede hablar con este backend
+// Bloqueamos el paso a curiosos, pero aceptamos producción y previews de Vercel
 app.use(cors({
-  origin: 'https://falsemedia.vercel.app', // <-- URL de producción corregida
+  origin: function (origin, callback) {
+    // Permitir si no hay origen (ej. Postman), si es tu URL de producción, o si termina en .vercel.app (tus previews)
+    if (!origin || origin === 'https://falsemedia.vercel.app' || origin.endsWith('.vercel.app')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Bloqueado por CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true 
 }))
