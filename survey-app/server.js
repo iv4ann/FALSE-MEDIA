@@ -47,7 +47,7 @@ app.post('/api/guardar-encuesta', async (req, res) => {
     const reside = datos.resideEnDurango === 'si'
     const idEdad = mapaEdades[datos.item2_edad] || 2 
 
-    // Insertar en la tabla principal: encuestas
+    // Guardar siempre la encuesta principal
     const queryEncuesta = `
       INSERT INTO encuestas (nombre, email, reside_durango, id_rango_edad, dispositivo)
       VALUES ($1, $2, $3, $4, $5)
@@ -64,8 +64,8 @@ app.post('/api/guardar-encuesta', async (req, res) => {
     const resEncuesta = await client.query(queryEncuesta, valoresEncuesta)
     const idEncuestaGenerado = resEncuesta.rows[0].id_encuesta
 
-    // Si reside en Durango, guardamos los bloques 2 y 3 en la BD Principal
-    if (reside) {
+    // Guardar bloques 2 y 3 solo si reside en Durango y existen esos datos
+    if (reside && datos.item4_frecuencia_tec !== undefined) {
       const queryB2 = `
         INSERT INTO respuestas_bloque_2 
         (id_encuesta, item4_frecuencia_tec, item5_familiaridad_ia, item6_confianza_id, item7_frec_noticias, item8_verif_fuentes, item9_impacto_falsos)
@@ -74,7 +74,9 @@ app.post('/api/guardar-encuesta', async (req, res) => {
       await client.query(queryB2, [
         idEncuestaGenerado, datos.item4_frecuencia_tec, datos.item5_familiaridad_ia, datos.item6_confianza_identificar, datos.item7_frecuencia_noticias, datos.item8_verificacion_fuentes, datos.item9_impacto_falsos,
       ])
+    }
 
+    if (reside && datos.item10_algoritmos_redes !== undefined) {
       const queryB3 = `
         INSERT INTO respuestas_bloque_3 
         (id_encuesta, item10_algoritmos_redes, item11_uso_ia_prod, item12_dependencia, item13_regulacion_ia, item14_privacidad, item15_reemplazo_lab)
@@ -85,8 +87,8 @@ app.post('/api/guardar-encuesta', async (req, res) => {
       ])
     }
 
-    // Guardar Bloque IV en la SEGUNDA BASE DE DATOS
-    if (reside) {
+    // Guardar Bloque 4 en la SEGUNDA BASE DE DATOS solo si existen datos multimedia
+    if (reside && datos.item16_imagenes !== undefined) {
       const queryB4 = `
         INSERT INTO respuestas_multimedia
         (id_encuesta, respuestas_imagenes, respuestas_videos, respuestas_audios)
@@ -121,12 +123,12 @@ app.post('/api/guardar-encuesta', async (req, res) => {
     }
 
     await client.query('COMMIT')
-    res.status(200).json({ success: true, message: 'Encuesta guardada correctamente en ambas bases de datos' })
+    res.status(200).json({ success: true, message: 'Operación completada exitosamente' })
 
   } catch (error) {
     await client.query('ROLLBACK')
-    console.error('❌ Error al procesar la encuesta:', error)
-    res.status(500).json({ success: false, error: 'Error interno del servidor al guardar la encuesta' })
+    console.error('❌ Error al procesar:', error)
+    res.status(500).json({ success: false, error: 'Error interno del servidor' })
   } finally {
     client.release()
   }
