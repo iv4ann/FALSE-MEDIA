@@ -1,40 +1,3 @@
-import express from 'express'
-import cors from 'cors'
-import pg from 'pg'
-
-const { Pool } = pg 
-
-const app = express() 
-
-// Bloqueamos el paso a curiosos: Solo Vercel puede hablar con este backend
-// Bloqueamos el paso a curiosos, pero aceptamos producción y previews de Vercel
-app.use(cors({
-  origin: function (origin, callback) {
-    // Permitir si no hay origen (ej. Postman), si es tu URL de producción, o si termina en .vercel.app (tus previews)
-    if (!origin || origin === 'https://falsemedia.vercel.app' || origin.endsWith('.vercel.app')) {
-      callback(null, true);
-    } else {
-      callback(new Error('Bloqueado por CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true 
-}))
-
-app.use(express.json())
-
-// 1. CONEXIÓN A TU BASE DE DATOS PRINCIPAL 
-const poolPrincipal = new Pool({
-  connectionString: 'postgresql://neondb_owner:npg_mtFT5K2DVQvA@ep-shiny-boat-axjw0w6g-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
-  ssl: { rejectUnauthorized: false }
-})
-
-// 2. CONEXIÓN A TU NUEVA BASE DE DATOS (Bloque 4 - Multimedia)
-const poolMultimedia = new Pool({
-  connectionString: 'postgresql://neondb_owner:npg_mtFT5K2DVQvA@ep-shiny-boat-axjw0w6g-pooler.c-4.us-east-2.aws.neon.tech/multimedia?sslmode=require&channel_binding=require',
-  ssl: { rejectUnauthorized: false }
-})
-
 app.post('/api/guardar-encuesta', async (req, res) => {
   const datos = req.body
   console.log("📦 ESTO MANDA REACT:", datos); 
@@ -91,40 +54,49 @@ app.post('/api/guardar-encuesta', async (req, res) => {
     // 👇 3. Guardar Bloque IV en la SEGUNDA BASE DE DATOS 👇
     if (reside) {
       const queryB4 = `
-        INSERT INTO respuestas_bloque_4
-        (id_encuesta, item16_imagenes, item17_imagenes, item18_imagenes, item19_noticias, item20_noticias, item21_videos, item22_videos, item23_videos, item24_audio, item25_audio, item26_audio)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);
+        INSERT INTO respuestas_multimedia
+        (id_encuesta, respuestas_imagenes, respuestas_videos, respuestas_audios)
+        VALUES ($1, $2, $3, $4);
       `
+      
+      const jsonImagenes = JSON.stringify({
+        item16: datos.item16_imagenes,
+        item17: datos.item17_imagenes,
+        item18: datos.item18_imagenes
+      });
+
+      const jsonVideos = JSON.stringify({
+        item21: datos.item21_videos,
+        item22: datos.item22_videos,
+        item23: datos.item23_videos
+      });
+
+      const jsonAudios = JSON.stringify({
+        item24: datos.item24_audio,
+        item25: datos.item25_audio,
+        item26: datos.item26_audio
+      });
       
       await poolMultimedia.query(queryB4, [
         idEncuestaGenerado,
-        datos.item16_imagenes, datos.item17_imagenes, datos.item18_imagenes,
-        datos.item19_noticias, datos.item20_noticias,
-        datos.item21_videos, datos.item22_videos, datos.item23_videos,
-        datos.item24_audio, datos.item25_audio, datos.item26_audio
+        jsonImagenes, 
+        jsonVideos, 
+        jsonAudios
       ])
-      console.log(`🎥 ¡Bloque 4 multimedia guardado con éxito!`)
+      console.log(`🎥 ¡Bloque 4 multimedia guardado con éxito en formato JSON!`)
     }
-    
-    // Confirmamos el guardado en la BD Principal HASTA EL FINAL
-    await client.query('COMMIT')
-    console.log(`✅ ¡Encuesta #${idEncuestaGenerado} completada y guardada en ambas bases!`)
 
-    res.status(200).json({ success: true, id_encuesta: idEncuestaGenerado })
+    // 👇 4. CONFIRMAR LA TRANSACCIÓN Y RESPONDER AL FRONTEND 👇
+    await client.query('COMMIT')
+    res.status(200).json({ success: true, message: 'Encuesta guardada correctamente en ambas bases de datos' })
 
   } catch (error) {
-    // Si algo sale mal en cualquier punto, deshacemos lo de la BD principal
+    // 👇 5. SI ALGO FALLA, DESHACER CAMBIOS Y AVISAR 👇
     await client.query('ROLLBACK')
-    console.error('❌ Error al guardar en PostgreSQL:', error)
-    res.status(500).json({ success: false, error: 'Error interno de base de datos' })
+    console.error('❌ Error al procesar la encuesta:', error)
+    res.status(500).json({ success: false, error: 'Error interno del servidor al guardar la encuesta' })
   } finally {
-    client.release() 
+    // 👇 6. LIBERAR LA CONEXIÓN SIEMPRE 👇
+    client.release()
   }
 })
-
-// Este es el puerto que Render te asignará automáticamente
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`🚀 Jarvis en línea: Servidor corriendo al cien en el puerto ${PORT}`);
-});
