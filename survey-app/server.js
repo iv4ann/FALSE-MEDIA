@@ -8,14 +8,14 @@ const app = express()
 
 // Bloqueamos el paso a curiosos: Solo Vercel puede hablar con este backend
 app.use(cors({
-  origin: 'https://falsemedia-5cf9o5q9f-false-media.vercel.app', 
+  origin: 'https://falsemedia.vercel.app', // <-- URL de producción corregida
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true 
 }))
 
 app.use(express.json())
 
-// 1. CONEXIÓN A TU BASE DE DATOS PRINCIPAL (Actualizada con tu nuevo string de Neon)
+// 1. CONEXIÓN A TU BASE DE DATOS PRINCIPAL 
 const poolPrincipal = new Pool({
   connectionString: 'postgresql://neondb_owner:npg_mtFT5K2DVQvA@ep-shiny-boat-axjw0w6g-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
   ssl: { rejectUnauthorized: false }
@@ -31,7 +31,7 @@ app.post('/api/guardar-encuesta', async (req, res) => {
   const datos = req.body
   console.log("📦 ESTO MANDA REACT:", datos); 
 
-  // Usamos el pool principal para arrancar
+  // Usamos el pool principal para arrancar la transacción
   const client = await poolPrincipal.connect()
 
   try {
@@ -80,18 +80,14 @@ app.post('/api/guardar-encuesta', async (req, res) => {
       ])
     }
 
-    // Confirmamos el guardado en la BD Principal ANTES del bloque multimedia
-    await client.query('COMMIT')
-    console.log(`✅ ¡Encuesta #${idEncuestaGenerado} guardada en BD Principal!`)
-
-    // 👇 3. NUEVO: Guardar Bloque IV en la SEGUNDA BASE DE DATOS 👇
+    // 👇 3. Guardar Bloque IV en la SEGUNDA BASE DE DATOS 👇
     if (reside) {
       const queryB4 = `
         INSERT INTO respuestas_bloque_4
         (id_encuesta, item16_imagenes, item17_imagenes, item18_imagenes, item19_noticias, item20_noticias, item21_videos, item22_videos, item23_videos, item24_audio, item25_audio, item26_audio)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);
       `
-      // OJO AQUÍ: Usamos poolMultimedia en lugar del client principal
+      
       await poolMultimedia.query(queryB4, [
         idEncuestaGenerado,
         datos.item16_imagenes, datos.item17_imagenes, datos.item18_imagenes,
@@ -102,10 +98,14 @@ app.post('/api/guardar-encuesta', async (req, res) => {
       console.log(`🎥 ¡Bloque 4 multimedia guardado con éxito!`)
     }
     
+    // Confirmamos el guardado en la BD Principal HASTA EL FINAL
+    await client.query('COMMIT')
+    console.log(`✅ ¡Encuesta #${idEncuestaGenerado} completada y guardada en ambas bases!`)
+
     res.status(200).json({ success: true, id_encuesta: idEncuestaGenerado })
 
   } catch (error) {
-    // Si algo sale mal en los primeros bloques, revertimos
+    // Si algo sale mal en cualquier punto, deshacemos lo de la BD principal
     await client.query('ROLLBACK')
     console.error('❌ Error al guardar en PostgreSQL:', error)
     res.status(500).json({ success: false, error: 'Error interno de base de datos' })
