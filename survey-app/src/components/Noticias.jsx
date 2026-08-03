@@ -6,9 +6,8 @@ const noticiasData = [
   { id: 20, type: 'image', url: '/noticia1.png', thumb: '/noticia1.png', title: 'Meteorito en NJ', isIA: false, desc: 'Ítem 20. Noticia de Meteorito que cayo en Nueva Jersey.', exp: 'No es IA, en este tipo de noticias es importante verificar la fuente.' }
 ];
 
-export default function Noticias() {
+export default function Noticias({ respuestas, setRespuestas }) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [respuestas, setRespuestas] = useState({});
   const [intentoCambio, setIntentoCambio] = useState(false);
 
   const activeItem = noticiasData[activeIndex];

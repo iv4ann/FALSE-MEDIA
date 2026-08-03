@@ -201,7 +201,8 @@ const AuthModal = ({ type, onClose, onAuth }) => {
 // ==========================================
 // COMPONENTE PRINCIPAL (FRAME)
 // ==========================================
-export const Frame = () => {
+// 👇 AQUÍ ESTÁ EL CAMBIO: Recibe las funciones de la caja fuerte global
+export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitReal }) => {
   const [activeModal, setActiveModal] = useState(null);
   const [activeNavigation, setActiveNavigation] = useState(null);
   const [user, setUser] = useState(null);
@@ -269,15 +270,19 @@ export const Frame = () => {
 
         <main className={`w-full flex-1 overflow-x-hidden flex justify-center items-start py-12 pb-24 relative ${activeModal ? 'overflow-y-hidden' : 'overflow-y-auto'}`}>
           <div className="relative transform scale-105 origin-top transition-transform w-full px-4">
-            {activeNavigation === 'Imagenes' && <Messi />}
-            {activeNavigation === 'Videos' && <Videos />}
-            {activeNavigation === 'Noticias' && <Noticias />}
-            {activeNavigation === 'Audios' && <Audios />}
+            
+            {/* 👇 AQUÍ ESTÁ EL CAMBIO: Pasamos el estado a los componentes */}
+            {activeNavigation === 'Imagenes' && <Messi respuestas={respuestasMultimedia} setRespuestas={setRespuestasMultimedia} />}
+            {activeNavigation === 'Videos' && <Videos respuestas={respuestasMultimedia} setRespuestas={setRespuestasMultimedia} />}
+            {activeNavigation === 'Noticias' && <Noticias respuestas={respuestasMultimedia} setRespuestas={setRespuestasMultimedia} />}
+            {activeNavigation === 'Audios' && <Audios respuestas={respuestasMultimedia} setRespuestas={setRespuestasMultimedia} />}
+            
             {activeNavigation === 'Survey' && (
               <Survey 
                 participant={user} 
                 onEarlyEnd={() => setActiveNavigation(null)} 
-                onSubmit={() => setActiveNavigation(null)} 
+                // 👇 AQUÍ ESTÁ EL CAMBIO: Llama a la función real que hace el fetch
+                onSubmit={(surveyData) => onSubmitReal(surveyData)} 
               />
             )}
           </div>

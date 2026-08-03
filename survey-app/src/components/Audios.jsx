@@ -7,9 +7,8 @@ const audiosData = [
   { id: 26, type: 'audio', url: '/Shaggy - It Wasn\'t Me (Country AI Version) [OD-Edp2BlsQ].mp3', thumb: '/messi.jpg', title: 'Audio 3', isIA: true, desc: 'Ítem 26. Audio 3.', exp: 'No manches pa se ve luego luego.' }
 ];
 
-export default function Audios() {
+export default function Audios({ respuestas, setRespuestas }) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [respuestas, setRespuestas] = useState({});
   const [intentoCambio, setIntentoCambio] = useState(false);
 
   const activeItem = audiosData[activeIndex];

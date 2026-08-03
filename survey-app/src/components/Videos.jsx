@@ -7,9 +7,8 @@ const videosData = [
   { id: 23, type: 'video', url: '/CRAFT (1979)： The First Night ｜ Episode 1 [zX-e9LRR_ko].mp4', thumb: '/noticia1.png', title: 'Pelicula Retro', isIA: true, desc: 'Ítem 23. Pelicula Retro.', exp: 'No manches pa se ve luego luego.' }
 ];
 
-export default function Videos() {
+export default function Videos({ respuestas, setRespuestas }) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [respuestas, setRespuestas] = useState({});
   const [intentoCambio, setIntentoCambio] = useState(false);
 
   const activeItem = videosData[activeIndex];

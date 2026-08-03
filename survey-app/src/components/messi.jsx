@@ -26,10 +26,9 @@ const mediaCategories = {
   ]
 };
 
-export const Messi = () => {
+export const Messi = ({ respuestas, setRespuestas }) => {
   const [activeCategory, setActiveCategory] = useState("Imagenes");
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [respuestas, setRespuestas] = useState({});
+  const [activeIndex, setActiveIndex] = useState(0); // <-- Solo déjalo una vez
   const [intentoCambio, setIntentoCambio] = useState(false);
 
   const currentCategoryData = mediaCategories[activeCategory];

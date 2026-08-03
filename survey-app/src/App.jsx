@@ -5,9 +5,11 @@ import Survey from './components/Survey'
 import Success from './components/Success'
 
 function App() {
-  // Añadimos 'home' como la vista inicial por defecto
-  const [view, setView] = useState('home') // 'home' | 'login' | 'survey' | 'end' | 'thanks'
+  const [view, setView] = useState('home') 
   const [participant, setParticipant] = useState(null)
+  
+  // 1. NUEVO: La caja fuerte global para la multimedia
+  const [respuestasMultimedia, setRespuestasMultimedia] = useState({}) 
 
   const handleLogin = (user) => {
     setParticipant(user)
@@ -18,9 +20,17 @@ function App() {
     setView('end')
   }
 
-  const handleSubmitSurvey = async (data) => {
-    console.log('Enviando datos al servidor en la nube...', data)
+  // 2. NUEVO: Esta función ahora recibe los datos de la encuesta y los une con la multimedia
+  const handleSubmitSurvey = async (surveyData) => {
+    // Unimos los dos paquetes de datos
+    const paqueteFinal = {
+      ...surveyData,
+      ...respuestasMultimedia
+    }
+
+    console.log('Enviando paquete completo al servidor...', paqueteFinal)
     
+    // OJO: Asegúrate de que no tenga la diagonal / al final
     const API_URL = 'https://false-media.onrender.com/api/guardar-encuesta';
 
     try {
@@ -29,7 +39,7 @@ function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(paqueteFinal), // Mandamos el paquete fusionado
       })
 
       if (response.ok) {
@@ -48,56 +58,36 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-100 flex items-center justify-center font-sans antialiased text-slate-800">
       
-      {/* Vista del Landing Page Principal (El diseño de Figma) */}
       {view === 'home' && (
         <Frame 
-          onNavigateToLogin={() => setView('login')} 
-          onNavigateToSurvey={() => setView('survey')} 
+          // 3. NUEVO: Le pasamos la caja fuerte y la función real a tu Frame principal
+          respuestasMultimedia={respuestasMultimedia}
+          setRespuestasMultimedia={setRespuestasMultimedia}
+          onSubmitReal={handleSubmitSurvey}
         />
       )}
 
-      {/* Contenedor para el resto de las vistas de la app */}
+      {/* Contenedor para el resto de las vistas (se mantiene igual) */}
       {view !== 'home' && (
         <div className="w-full max-w-5xl p-4 md:p-8">
-          
-          {view === 'login' && (
-            <Login onLogin={handleLogin} />
-          )}
-
+          {view === 'login' && <Login onLogin={handleLogin} />}
           {view === 'survey' && (
             <div className="bg-white rounded-3xl shadow-xl border border-slate-200 p-6 md:p-8 max-w-3xl mx-auto">
-              <Survey
-                participant={participant}
-                onSubmit={handleSubmitSurvey}
-                onEarlyEnd={handleEndEarly} 
-              />
+              <Survey participant={participant} onSubmit={handleSubmitSurvey} onEarlyEnd={handleEndEarly} />
             </div>
           )}
-
           {view === 'end' && (
-            <div className="bg-white rounded-3xl shadow-xl border border-slate-200 text-center py-12 px-6 max-w-md mx-auto">
-              <div className="mx-auto w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mb-4 shadow-inner">
-                <span className="text-2xl">📍</span>
-              </div>
+             // ... Tu código de vista 'end' se queda igual
+             <div className="bg-white rounded-3xl shadow-xl border border-slate-200 text-center py-12 px-6 max-w-md mx-auto">
               <h2 className="text-xl font-bold text-slate-800">Gracias por tu interés</h2>
-              <p className="text-slate-600 text-sm mt-2 leading-relaxed">
-                Este estudio estadístico está enfocado exclusivamente en evaluar la interacción con contenidos digitales en residentes actuales de la <span className="font-semibold text-slate-800">ciudad de Durango</span>.
-              </p>
-              <button
-                onClick={() => {setView('home'); setParticipant(null);}}
-                className="mt-6 w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3.5 px-4 rounded-full shadow-md transition-all active:scale-[0.98] text-sm cursor-pointer"
-              >
-                Volver al inicio
-              </button>
+              <button onClick={() => {setView('home'); setParticipant(null);}} className="mt-6 w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3.5 px-4 rounded-full">Volver al inicio</button>
             </div>
           )}
-
           {view === 'thanks' && (
             <div className="bg-white rounded-3xl shadow-xl border border-slate-200 max-w-md mx-auto">
-              <Success onRestart={() => { setView('home'); setParticipant(null); }} />
+              <Success onRestart={() => { setView('home'); setParticipant(null); setRespuestasMultimedia({}); }} />
             </div>
           )}
-
         </div>
       )}
     </div>
