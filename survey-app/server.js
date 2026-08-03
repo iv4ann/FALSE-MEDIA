@@ -210,6 +210,26 @@ app.post('/api/guardar-encuesta', verificarToken, async (req, res) => {
   }
 });
 
+// 5. Borrar Cuenta de Usuario
+app.delete('/api/usuario', verificarToken, async (req, res) => {
+  const idUsuario = req.usuario_id;
+
+  try {
+    // Opcional: Si quieres borrar también sus encuestas o dejar el registro huérfano (depende de tus FK)
+    // Por seguridad, borramos primero las referencias en encuestas o aseguramos CASCADE en la BD.
+    await poolPrincipal.query('DELETE FROM encuestas WHERE id_usuario = $1', [idUsuario]);
+    const result = await poolPrincipal.query('DELETE FROM usuarios WHERE id_usuario = $1 RETURNING id_usuario;', [idUsuario]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    res.status(200).json({ success: true, mensaje: 'Cuenta eliminada correctamente' });
+  } catch (error) {
+    console.error('Error al eliminar usuario:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
 // --- INICIO DEL SERVIDOR ---
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
