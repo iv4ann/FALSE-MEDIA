@@ -76,7 +76,6 @@ const AuthModal = ({ type, onClose, onAuthSuccess }) => {
     };
   }, []);
 
-  // Función para validar campos de texto normales
   const handleTextValidation = (e) => {
     e.target.setCustomValidity('');
     if (e.target.validity.valueMissing) {
@@ -84,7 +83,6 @@ const AuthModal = ({ type, onClose, onAuthSuccess }) => {
     }
   };
 
-  // Función para validar el correo y traducir los errores de HTML5
   const handleEmailValidation = (e) => {
     const val = e.target.value;
     e.target.setCustomValidity('');
@@ -267,7 +265,9 @@ const AuthModal = ({ type, onClose, onAuthSuccess }) => {
 // MODAL PARA EDITAR PERFIL
 // ==========================================
 const EditProfileModal = ({ user, onClose, onUpdateSuccess }) => {
-  const [name, setName] = useState(user.name);
+  const [name, setName] = useState(user.name || '');
+  const [email, setEmail] = useState(user.email || '');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleTextValidation = (e) => {
@@ -277,10 +277,31 @@ const EditProfileModal = ({ user, onClose, onUpdateSuccess }) => {
     }
   };
 
+  const handleEmailValidation = (e) => {
+    const val = e.target.value;
+    e.target.setCustomValidity('');
+    if (e.target.validity.valueMissing) {
+      e.target.setCustomValidity('Por favor, rellena este campo.');
+    } else if (e.target.validity.typeMismatch) {
+      if (!val.includes('@')) {
+        e.target.setCustomValidity(`Por favor incluye un '@' en el correo electrónico. A '${val}' le falta un '@'.`);
+      } else if (val.endsWith('@')) {
+        e.target.setCustomValidity(`Por favor ingresa una parte después del '@'. '${val}' está incompleto.`);
+      } else {
+        e.target.setCustomValidity('El formato del correo electrónico no es válido.');
+      }
+    }
+  };
+
   const handleUpdate = async (e) => {
     e.preventDefault();
     setLoading(true);
     const token = localStorage.getItem('token');
+    
+    const payload = { nombre: name, email: email };
+    if (password.trim() !== "") {
+      payload.password = password;
+    }
 
     try {
       const response = await fetch('https://false-media.onrender.com/api/usuario', {
@@ -289,11 +310,11 @@ const EditProfileModal = ({ user, onClose, onUpdateSuccess }) => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ nombre: name })
+        body: JSON.stringify(payload)
       });
       const data = await response.json();
       if (response.ok) {
-        onUpdateSuccess(data.usuario);
+        onUpdateSuccess(data.usuario || { ...user, name: name, email: email });
         onClose();
       } else {
         alert(data.error);
@@ -308,18 +329,16 @@ const EditProfileModal = ({ user, onClose, onUpdateSuccess }) => {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 font-sans">
       <div className="w-full max-w-md bg-black border-2 border-[#ff3f14] p-6 shadow-[8px_8px_0px_#ff3f14] relative">
-        
-        {/* TACHA EN LA ESQUINA SUPERIOR DERECHA */}
         <button onClick={onClose} className="absolute top-4 right-4 font-vt323 text-white/50 hover:text-white text-2xl cursor-pointer z-50">
           [X]
         </button>
 
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-6">
           <h2 className="font-silkscreen text-white text-xl">MODIFICAR PERFIL</h2>
         </div>
         <form onSubmit={handleUpdate} className="space-y-4">
           <div>
-            <label className="block text-[#ff3f14] font-vt323 text-xl mb-1">Nuevo Nombre</label>
+            <label className="block text-[#ff3f14] font-vt323 text-xl mb-1">Nombre</label>
             <input 
               type="text" 
               required 
@@ -330,10 +349,35 @@ const EditProfileModal = ({ user, onClose, onUpdateSuccess }) => {
               className="w-full px-3 py-2 bg-white/5 border border-white/20 text-white font-vt323 text-xl focus:outline-none focus:border-[#ff3f14]"
             />
           </div>
+          
+          <div>
+            <label className="block text-[#ff3f14] font-vt323 text-xl mb-1">Correo Electrónico</label>
+            <input 
+              type="email" 
+              required 
+              onInvalid={handleEmailValidation}
+              onInput={handleEmailValidation}
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-3 py-2 bg-white/5 border border-white/20 text-white font-vt323 text-xl focus:outline-none focus:border-[#ff3f14]"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[#ff3f14] font-vt323 text-xl mb-1">Nueva Contraseña <span className="text-white/40 text-sm">(Opcional)</span></label>
+            <input 
+              type="password"
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-3 py-2 bg-white/5 border border-white/20 text-white font-vt323 text-xl focus:outline-none focus:border-[#ff3f14]"
+              placeholder="Deja en blanco para no cambiar"
+            />
+          </div>
+
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full py-2 bg-[#ff3f14] text-white font-silkscreen hover:bg-white hover:text-black transition-colors cursor-pointer"
+            className="w-full py-2 mt-4 bg-[#ff3f14] text-white font-silkscreen hover:bg-white hover:text-black transition-colors cursor-pointer"
           >
             {loading ? 'GUARDANDO...' : 'ACTUALIZAR DATOS'}
           </button>
@@ -342,6 +386,88 @@ const EditProfileModal = ({ user, onClose, onUpdateSuccess }) => {
     </div>
   );
 };
+
+// ==========================================
+// MODAL PARA ELIMINAR CUENTA (NUEVO)
+// ==========================================
+const DeleteProfileModal = ({ user, onClose, onDeleteSuccess, mostrarAlerta }) => {
+  const [confirmText, setConfirmText] = useState('');
+  const [loading, setLoading] = useState(false);
+  
+  const expectedText = `delete ${user.name}`;
+
+  const handleDelete = async (e) => {
+    e.preventDefault();
+    if (confirmText !== expectedText) return;
+    
+    setLoading(true);
+    const token = localStorage.getItem('token');
+    
+    try {
+      const response = await fetch('https://false-media.onrender.com/api/usuario', {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        onDeleteSuccess();
+      } else {
+        mostrarAlerta("No se pudo eliminar la cuenta.");
+        onClose();
+      }
+    } catch (err) {
+      mostrarAlerta("Error de red al intentar borrar la cuenta.");
+      onClose();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 font-sans">
+      <div className="w-full max-w-md bg-black border-2 border-red-700 p-6 shadow-[8px_8px_0px_#b91c1c] relative">
+        <button onClick={onClose} className="absolute top-4 right-4 font-vt323 text-white/50 hover:text-white text-2xl cursor-pointer z-50">
+          [X]
+        </button>
+
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="font-silkscreen text-red-500 text-xl">ADVERTENCIA CRÍTICA</h2>
+        </div>
+        
+        <p className="font-vt323 text-white text-xl mb-6">
+          Estás a punto de eliminar tu perfil de forma <span className="text-red-500">permanente</span>. Esta acción no se puede deshacer.
+        </p>
+        
+        <form onSubmit={handleDelete} className="space-y-4">
+          <div>
+            <label className="block text-white/70 font-vt323 text-lg mb-2">
+              Para confirmar, escribe exactamente: <span className="text-[#ff3f14] bg-white/10 px-2 py-1 font-bold">{expectedText}</span>
+            </label>
+            <input 
+              type="text" 
+              required 
+              value={confirmText} 
+              onChange={(e) => setConfirmText(e.target.value)}
+              className="w-full px-3 py-2 bg-white/5 border border-red-700/50 text-white font-vt323 text-xl focus:outline-none focus:border-red-500 focus:bg-red-950/30"
+              placeholder={expectedText}
+            />
+          </div>
+          <button 
+            type="submit" 
+            disabled={loading || confirmText !== expectedText}
+            className={`w-full py-2 font-silkscreen transition-colors ${
+              confirmText === expectedText 
+              ? 'bg-red-700 text-white hover:bg-red-600 cursor-pointer' 
+              : 'bg-white/10 text-white/30 cursor-not-allowed'
+            }`}
+          >
+            {loading ? 'ELIMINANDO...' : 'BORRAR MI CUENTA'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 
 // ==========================================
 // COMPONENTE PRINCIPAL (FRAME)
@@ -360,26 +486,10 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
     }, 5000);
   };
 
-  const handleDeleteAccount = async () => {
-    if (!window.confirm("⚠️ ¿Estás seguro de que deseas borrar tu perfil permanentemente? Esta acción no se puede deshacer.")) return;
-    
-    const token = localStorage.getItem('token');
-    try {
-      const response = await fetch('https://false-media.onrender.com/api/usuario', {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        localStorage.removeItem('token');
-        setUser(null);
-        setActiveNavigation(null);
-        mostrarAlerta("Cuenta eliminada con éxito.");
-      } else {
-        mostrarAlerta("No se pudo eliminar la cuenta.");
-      }
-    } catch (err) {
-      mostrarAlerta("Error de red al intentar borrar la cuenta.");
-    }
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('token');
+    if (activeNavigation === 'Survey') setActiveNavigation(null);
   };
 
   // ----------------------------------------------------
@@ -389,7 +499,6 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
     return (
       <div className="w-full h-screen bg-black flex flex-col overflow-hidden font-sans">
         
-        {/* COMPONENTE FLOTANTE DE ALERTA CENTRADO EN MEDIO DE LA PANTALLA */}
         {alertaMensaje && (
           <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[9999] bg-[#4a0a0a] text-white/90 font-vt323 text-2xl px-10 py-3 rounded-md shadow-[0_4px_15px_rgba(0,0,0,0.5)] border border-[#2b0505]">
             {alertaMensaje}
@@ -427,8 +536,8 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
               <>
                 <span className="font-vt323 text-[#ff3f14] text-[22px]">[OP: {user.name.toUpperCase()}]</span>
                 <button onClick={() => setActiveModal('edit')} className="bg-amber-600 text-white px-3 py-1 rounded font-vt323 text-xl hover:bg-amber-500 cursor-pointer">Modificar</button>
-                <button onClick={handleDeleteAccount} className="bg-red-700 text-white px-3 py-1 rounded font-vt323 text-xl hover:bg-red-600 cursor-pointer">Borrar Cuenta</button>
-                <button onClick={() => { setUser(null); localStorage.removeItem('token'); if (activeNavigation === 'Survey') setActiveNavigation(null); }} className="bg-white text-black px-4 py-1 rounded font-vt323 text-xl hover:bg-[#ff3f14] hover:text-white cursor-pointer">Desconectar</button>
+                <button onClick={() => setActiveModal('delete')} className="bg-red-700 text-white px-3 py-1 rounded font-vt323 text-xl hover:bg-red-600 cursor-pointer">Borrar Cuenta</button>
+                <button onClick={handleLogout} className="bg-white text-black px-4 py-1 rounded font-vt323 text-xl hover:bg-[#ff3f14] hover:text-white cursor-pointer">Desconectar</button>
               </>
             )}
           </div>
@@ -436,24 +545,34 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
 
         <main className={`w-full flex-1 overflow-x-hidden flex justify-center items-start py-12 pb-24 relative ${activeModal ? 'overflow-y-hidden' : 'overflow-y-auto'}`}>
           <div className="relative transform scale-105 origin-top transition-transform w-full px-4">
-            
             {activeNavigation === 'Imagenes' && <Messi respuestas={respuestasMultimedia} setRespuestas={setRespuestasMultimedia} />}
             {activeNavigation === 'Videos' && <Videos respuestas={respuestasMultimedia} setRespuestas={setRespuestasMultimedia} />}
             {activeNavigation === 'Noticias' && <Noticias respuestas={respuestasMultimedia} setRespuestas={setRespuestasMultimedia} />}
             {activeNavigation === 'Audios' && <Audios respuestas={respuestasMultimedia} setRespuestas={setRespuestasMultimedia} />}
             
             {activeNavigation === 'Survey' && (
-              <Survey 
-                participant={user} 
-                onEarlyEnd={() => setActiveNavigation(null)} 
-                onSubmit={(surveyData) => onSubmitReal(surveyData)} 
-              />
+              <Survey participant={user} onEarlyEnd={() => setActiveNavigation(null)} onSubmit={(surveyData) => onSubmitReal(surveyData)} />
             )}
           </div>
         </main>
 
         {activeModal === 'edit' && (
-          <EditProfileModal user={user} onClose={() => setActiveModal(null)} onUpdateSuccess={(updated) => setUser({ ...user, name: updated.nombre })} />
+          <EditProfileModal user={user} onClose={() => setActiveModal(null)} onUpdateSuccess={(updated) => setUser({ ...user, name: updated.nombre, email: updated.email })} />
+        )}
+
+        {activeModal === 'delete' && (
+          <DeleteProfileModal 
+            user={user} 
+            onClose={() => setActiveModal(null)} 
+            mostrarAlerta={mostrarAlerta}
+            onDeleteSuccess={() => { 
+              localStorage.removeItem('token'); 
+              setUser(null); 
+              setActiveNavigation(null); 
+              setActiveModal(null);
+              mostrarAlerta("Cuenta eliminada permanentemente."); 
+            }} 
+          />
         )}
       </div>
     );
@@ -465,7 +584,6 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
   return (
     <div className="w-full h-screen bg-black overflow-hidden font-sans relative flex flex-col">
       
-      {/* COMPONENTE FLOTANTE DE ALERTA CENTRADO EN MEDIO DE LA PANTALLA */}
       {alertaMensaje && (
         <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[9999] bg-[#4a0a0a] text-white/90 font-vt323 text-2xl px-10 py-3 rounded-md shadow-[0_4px_15px_rgba(0,0,0,0.5)] border border-[#2b0505]">
           {alertaMensaje}
@@ -479,8 +597,8 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
             <>
               <span className="font-vt323 text-[#ff3f14] text-[26px]">[OP: {user.name.toUpperCase()}]</span>
               <button onClick={() => setActiveModal('edit')} className="bg-amber-600 text-white px-3 py-1 rounded font-vt323 text-xl hover:bg-amber-500 cursor-pointer">Modificar</button>
-              <button onClick={handleDeleteAccount} className="bg-red-700 text-white px-3 py-1 rounded font-vt323 text-xl hover:bg-red-600 cursor-pointer">Borrar Cuenta</button>
-              <button onClick={() => { setUser(null); localStorage.removeItem('token'); }} className="bg-white text-black px-5 py-1.5 rounded font-vt323 text-[26px] hover:bg-[#ff3f14] hover:text-white cursor-pointer">Desconectar</button>
+              <button onClick={() => setActiveModal('delete')} className="bg-red-700 text-white px-3 py-1 rounded font-vt323 text-xl hover:bg-red-600 cursor-pointer">Borrar Cuenta</button>
+              <button onClick={handleLogout} className="bg-white text-black px-5 py-1.5 rounded font-vt323 text-[26px] hover:bg-[#ff3f14] hover:text-white cursor-pointer">Desconectar</button>
             </>
           ) : (
             <>
@@ -499,31 +617,16 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
       <main className={`w-full h-full overflow-x-hidden relative ${activeModal ? 'overflow-y-hidden' : 'overflow-y-auto'}`}>
         
         <div className="relative w-full h-[2048px] flex justify-center">
-          
-          <img
-            className="absolute top-0 left-0 w-full h-[1159px] object-cover pointer-events-none z-0"
-            alt="Retro television displays and electronic equipment"
-            src={unsplashEzen4Jyrvyq}
-          />
+          <img className="absolute top-0 left-0 w-full h-[1159px] object-cover pointer-events-none z-0" alt="Retro television displays" src={unsplashEzen4Jyrvyq} />
           <div className="absolute top-[1157px] left-0 w-full h-[1024px] bg-black shadow-[0px_4px_122px_155px_#00000040,0px_4px_67.3px_156px_#00000040] pointer-events-none z-0" />
 
           <div className="relative w-[1440px] h-full shrink-0 z-10 pointer-events-none">
             
             <header className="absolute top-0 left-0 w-[1440px] h-[716px]">
-              <div
-                className="absolute top-[188px] left-[1025px] w-[586px] h-[349px] rounded-[293px/174.5px] border border-dashed border-white pointer-events-auto"
-                aria-hidden="true"
-              />
-              <nav
-                className="absolute top-[660px] left-[390px] w-[724px] h-[57px] flex items-center justify-center gap-[60px] bg-[#ff3f14] rounded-md shadow-[4px_4px_0px_#000000bf] pointer-events-auto"
-              >
+              <div className="absolute top-[188px] left-[1025px] w-[586px] h-[349px] rounded-[293px/174.5px] border border-dashed border-white pointer-events-auto" aria-hidden="true" />
+              <nav className="absolute top-[660px] left-[390px] w-[724px] h-[57px] flex items-center justify-center gap-[60px] bg-[#ff3f14] rounded-md shadow-[4px_4px_0px_#000000bf] pointer-events-auto">
                 {navigationItems.map((item) => (
-                  <button
-                    key={item.label}
-                    type="button"
-                    className="flex items-center gap-4 font-vt323 font-normal text-white text-2xl tracking-[0] leading-[normal] whitespace-nowrap hover:scale-105 transition-transform cursor-pointer focus-visible:outline-white"
-                    onClick={() => setActiveNavigation(item.label)}
-                  >
+                  <button key={item.label} type="button" className="flex items-center gap-4 font-vt323 font-normal text-white text-2xl tracking-[0] leading-[normal] whitespace-nowrap hover:scale-105 transition-transform cursor-pointer focus-visible:outline-white" onClick={() => setActiveNavigation(item.label)}>
                     {item.label}
                     <img className="w-[8px] h-[10px]" alt="" src={item.icon} aria-hidden="true" />
                   </button>
@@ -610,7 +713,22 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
       )}
 
       {activeModal === 'edit' && (
-        <EditProfileModal user={user} onClose={() => setActiveModal(null)} onUpdateSuccess={(updated) => setUser({ ...user, name: updated.nombre })} />
+        <EditProfileModal user={user} onClose={() => setActiveModal(null)} onUpdateSuccess={(updated) => setUser({ ...user, name: updated.nombre, email: updated.email })} />
+      )}
+
+      {activeModal === 'delete' && (
+        <DeleteProfileModal 
+          user={user} 
+          onClose={() => setActiveModal(null)}
+          mostrarAlerta={mostrarAlerta}
+          onDeleteSuccess={() => { 
+            localStorage.removeItem('token'); 
+            setUser(null); 
+            setActiveNavigation(null); 
+            setActiveModal(null);
+            mostrarAlerta("Cuenta eliminada permanentemente."); 
+          }} 
+        />
       )}
 
     </div>
