@@ -76,6 +76,31 @@ const AuthModal = ({ type, onClose, onAuthSuccess }) => {
     };
   }, []);
 
+  // Función para validar campos de texto normales
+  const handleTextValidation = (e) => {
+    e.target.setCustomValidity('');
+    if (e.target.validity.valueMissing) {
+      e.target.setCustomValidity('Por favor, rellena este campo.');
+    }
+  };
+
+  // Función para validar el correo y traducir los errores de HTML5
+  const handleEmailValidation = (e) => {
+    const val = e.target.value;
+    e.target.setCustomValidity('');
+    if (e.target.validity.valueMissing) {
+      e.target.setCustomValidity('Por favor, rellena este campo.');
+    } else if (e.target.validity.typeMismatch) {
+      if (!val.includes('@')) {
+        e.target.setCustomValidity(`Por favor incluye un '@' en el correo electrónico. A '${val}' le falta un '@'.`);
+      } else if (val.endsWith('@')) {
+        e.target.setCustomValidity(`Por favor ingresa una parte después del '@'. '${val}' está incompleto.`);
+      } else {
+        e.target.setCustomValidity('El formato del correo electrónico no es válido.');
+      }
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!consent) return;
@@ -142,6 +167,8 @@ const AuthModal = ({ type, onClose, onAuthSuccess }) => {
                   <input
                     type="text"
                     required
+                    onInvalid={handleTextValidation}
+                    onInput={handleTextValidation}
                     className="w-full px-4 py-2 bg-white/5 border border-white/20 focus:border-[#ff3f14] focus:outline-none focus:ring-1 focus:ring-[#ff3f14] text-white font-vt323 text-xl transition-colors placeholder-white/30"
                     placeholder="Tu nombre completo"
                     value={name}
@@ -155,6 +182,8 @@ const AuthModal = ({ type, onClose, onAuthSuccess }) => {
                 <input
                   type="email"
                   required
+                  onInvalid={handleEmailValidation}
+                  onInput={handleEmailValidation}
                   className="w-full px-4 py-2 bg-white/5 border border-white/20 focus:border-[#ff3f14] focus:outline-none focus:ring-1 focus:ring-[#ff3f14] text-white font-vt323 text-xl transition-colors placeholder-white/30"
                   placeholder="usuario@red.com"
                   value={email}
@@ -167,6 +196,8 @@ const AuthModal = ({ type, onClose, onAuthSuccess }) => {
                 <input
                   type="password"
                   required
+                  onInvalid={handleTextValidation}
+                  onInput={handleTextValidation}
                   className="w-full px-4 py-2 bg-white/5 border border-white/20 focus:border-[#ff3f14] focus:outline-none focus:ring-1 focus:ring-[#ff3f14] text-white font-vt323 text-xl transition-colors placeholder-white/30"
                   placeholder="••••••••"
                   value={password}
@@ -239,6 +270,13 @@ const EditProfileModal = ({ user, onClose, onUpdateSuccess }) => {
   const [name, setName] = useState(user.name);
   const [loading, setLoading] = useState(false);
 
+  const handleTextValidation = (e) => {
+    e.target.setCustomValidity('');
+    if (e.target.validity.valueMissing) {
+      e.target.setCustomValidity('Por favor, rellena este campo.');
+    }
+  };
+
   const handleUpdate = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -285,6 +323,8 @@ const EditProfileModal = ({ user, onClose, onUpdateSuccess }) => {
             <input 
               type="text" 
               required 
+              onInvalid={handleTextValidation}
+              onInput={handleTextValidation}
               value={name} 
               onChange={(e) => setName(e.target.value)}
               className="w-full px-3 py-2 bg-white/5 border border-white/20 text-white font-vt323 text-xl focus:outline-none focus:border-[#ff3f14]"
@@ -508,7 +548,7 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
                 ACERCA DE<br />NOSOTROS
               </h2>
               <p className="absolute top-[1120px] left-[1050px] w-[330px] m-0 font-vt323 font-normal text-white text-[22px] tracking-[0] leading-[26px]">
-                FALSE-MEDIA nace como una plataforma web y un espacio de concientización diseñado para visibilizar el uso irresponsable de la inteligencia artificial...
+                FALSE-MEDIA nace como una plataforma web y un espacio de concientización diseñado para visibilizar el uso irresponsable de la inteligencia artificial, promoviendo el pensamiento crítico frente a la proliferación masiva de deepfakes, audios sintéticos y noticias alteradas. Nuestro objetivo es examinar cómo la manipulación digital afecta la confianza pública.
               </p>
             </section>
 
