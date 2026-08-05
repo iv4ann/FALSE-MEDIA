@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import unsplashEzen4Jyrvyq from "../assets/unsplash_ezEn4jYrVYQ.png";
 
 const videosData = [
-  { id: 21, type: 'video', url: '/Attack on Titan – If it was made in 1970! [t12Uzr3OL-Q].mp4', thumb: '/everest.jpg', title: 'Caricatura 70s', isIA: true, desc: 'Ítem 21. Caricatura de los 70s.', exp: 'No manches pa se ve luego luego.' },
-  { id: 22, type: 'video', url: '/The Better Minecraft Movie [HFkr74Xy1Y4].mp4', thumb: '/messi.jpg', title: 'Gordon Ramsay', isIA: false, desc: 'Ítem 22. Gordon Ramsay en Minecraft.', exp: 'No manches pa se ve luego luego.' },
-  { id: 23, type: 'video', url: '/CRAFT (1979)： The First Night ｜ Episode 1 [zX-e9LRR_ko].mp4', thumb: '/noticia1.png', title: 'Pelicula Retro', isIA: true, desc: 'Ítem 23. Pelicula Retro.', exp: 'No manches pa se ve luego luego.' }
+  { id: 21, type: 'video', url: '/Attack on Titan – If it was made in 1970! [t12Uzr3OL-Q].mp4', thumb: '/eren.jpg', title: 'Caricatura 70s', isIA: true, desc: 'Ítem 21. Caricatura de los 70s.', exp: 'No manches pa se ve luego luego.' },
+  { id: 22, type: 'video', url: '/The Better Minecraft Movie [HFkr74Xy1Y4].mp4', thumb: '/ramsay.jpg', title: 'Gordon Ramsay', isIA: false, desc: 'Ítem 22. Gordon Ramsay en Minecraft.', exp: 'No manches pa se ve luego luego.' },
+  { id: 23, type: 'video', url: '/CRAFT (1979)： The First Night ｜ Episode 1 [zX-e9LRR_ko].mp4', thumb: '/craft.jpg', title: 'Pelicula Retro', isIA: true, desc: 'Ítem 23. Pelicula Retro.', exp: 'No manches pa se ve luego luego.' }
 ];
 
 export default function Videos({ respuestas, setRespuestas }) {

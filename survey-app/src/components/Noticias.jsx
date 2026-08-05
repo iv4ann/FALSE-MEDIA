@@ -49,8 +49,13 @@ export default function Noticias({ respuestas, setRespuestas }) {
             <p className="mt-2 font-vt323 text-[20px] leading-[26px] text-gray-300">{activeItem.desc}</p>
           </div>
 
+         {/* Visor Multimedia Activo (Noticias) */}
           <div className="bg-black/80 rounded-xl overflow-hidden flex justify-center items-center h-[210px] border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.8)] backdrop-blur-sm">
-            <img src={activeItem.url} alt="Reto" className="max-h-[210px] w-auto object-contain" />
+            <img 
+              src={activeItem.url} 
+              alt="Reto" 
+              className="w-[380px] h-[190px] object-cover object-top rounded-md" 
+            />
           </div>
 
           <div className="w-full">

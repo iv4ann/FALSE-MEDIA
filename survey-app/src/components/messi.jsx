@@ -99,11 +99,14 @@ export const Messi = ({ respuestas, setRespuestas }) => {
               {activeItem.desc}
             </p>
           </div>
-
-          {/* Visor Multimedia Activo (Imagenes, Videos o Audios) */}
+{/* Visor Multimedia Activo (Imagenes, Videos o Audios) */}
           <div className="bg-black/80 rounded-xl overflow-hidden flex justify-center items-center h-[210px] border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.8)] backdrop-blur-sm">
             {activeItem.type === 'image' && (
-              <img src={activeItem.url} alt="Reto" className="max-h-[210px] w-auto object-contain" />
+              <img 
+                src={activeItem.url} 
+                alt="Reto" 
+                className="w-[380px] h-[190px] object-cover object-top rounded-md" 
+              />
             )}
             {activeItem.type === 'video' && (
               <video controls playsInline className="w-full max-h-[210px] object-contain">

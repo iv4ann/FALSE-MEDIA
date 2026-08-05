@@ -111,6 +111,11 @@ const AuthModal = ({ type, onClose, onAuthSuccess }) => {
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 font-sans overflow-y-auto">
       <div className="w-full max-w-5xl bg-black border-2 border-[#ff3f14] shadow-[8px_8px_0px_#ff3f14,0_0_40px_rgba(255,63,20,0.4)] flex flex-col md:flex-row min-h-[620px] relative overflow-hidden my-auto">
         <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_4px] z-20 opacity-40"></div>
+        
+        <button onClick={onClose} className="absolute top-4 right-6 font-vt323 text-white/60 hover:text-white text-3xl cursor-pointer z-[150] bg-black/40 px-2 py-1 rounded">
+          [X]
+        </button>
+
         <div className="w-full md:w-3/5 p-8 md:p-12 relative z-30 flex flex-col justify-between bg-black">
           <div>
             <div className="flex justify-between items-start mb-6">
@@ -122,9 +127,6 @@ const AuthModal = ({ type, onClose, onAuthSuccess }) => {
                   &gt; ESTUDIO DE DURANGO_
                 </p>
               </div>
-              <button onClick={onClose} className="font-vt323 text-white/50 hover:text-white text-2xl cursor-pointer">
-                [X]
-              </button>
             </div>
 
             {errorMsg && (
@@ -267,10 +269,15 @@ const EditProfileModal = ({ user, onClose, onUpdateSuccess }) => {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 font-sans">
-      <div className="w-full max-w-md bg-black border-2 border-[#ff3f14] p-6 shadow-[8px_8px_0px_#ff3f14]">
+      <div className="w-full max-w-md bg-black border-2 border-[#ff3f14] p-6 shadow-[8px_8px_0px_#ff3f14] relative">
+        
+        {/* TACHA EN LA ESQUINA SUPERIOR DERECHA */}
+        <button onClick={onClose} className="absolute top-4 right-4 font-vt323 text-white/50 hover:text-white text-2xl cursor-pointer z-50">
+          [X]
+        </button>
+
         <div className="flex justify-between items-center mb-4">
           <h2 className="font-silkscreen text-white text-xl">MODIFICAR PERFIL</h2>
-          <button onClick={onClose} className="font-vt323 text-white text-xl cursor-pointer">[X]</button>
         </div>
         <form onSubmit={handleUpdate} className="space-y-4">
           <div>
@@ -303,6 +310,15 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
   const [activeModal, setActiveModal] = useState(null);
   const [activeNavigation, setActiveNavigation] = useState(null);
   const [user, setUser] = useState(null);
+  
+  const [alertaMensaje, setAlertaMensaje] = useState(null);
+
+  const mostrarAlerta = (mensaje) => {
+    setAlertaMensaje(mensaje);
+    setTimeout(() => {
+      setAlertaMensaje(null);
+    }, 5000);
+  };
 
   const handleDeleteAccount = async () => {
     if (!window.confirm("⚠️ ¿Estás seguro de que deseas borrar tu perfil permanentemente? Esta acción no se puede deshacer.")) return;
@@ -317,12 +333,12 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
         localStorage.removeItem('token');
         setUser(null);
         setActiveNavigation(null);
-        alert("Cuenta eliminada con éxito.");
+        mostrarAlerta("Cuenta eliminada con éxito.");
       } else {
-        alert("No se pudo eliminar la cuenta.");
+        mostrarAlerta("No se pudo eliminar la cuenta.");
       }
     } catch (err) {
-      alert("Error de red al intentar borrar la cuenta.");
+      mostrarAlerta("Error de red al intentar borrar la cuenta.");
     }
   };
 
@@ -332,6 +348,14 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
   if (activeNavigation) {
     return (
       <div className="w-full h-screen bg-black flex flex-col overflow-hidden font-sans">
+        
+        {/* COMPONENTE FLOTANTE DE ALERTA CENTRADO EN MEDIO DE LA PANTALLA */}
+        {alertaMensaje && (
+          <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[9999] bg-[#4a0a0a] text-white/90 font-vt323 text-2xl px-10 py-3 rounded-md shadow-[0_4px_15px_rgba(0,0,0,0.5)] border border-[#2b0505]">
+            {alertaMensaje}
+          </div>
+        )}
+
         <header className="w-full h-[80px] shrink-0 bg-[#000000cc] border-b border-white/10 flex items-center justify-between px-10 shadow-[0_4px_30px_rgba(0,0,0,0.8)] z-50">
           <div className="flex items-center gap-8">
             <button 
@@ -401,6 +425,13 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
   return (
     <div className="w-full h-screen bg-black overflow-hidden font-sans relative flex flex-col">
       
+      {/* COMPONENTE FLOTANTE DE ALERTA CENTRADO EN MEDIO DE LA PANTALLA */}
+      {alertaMensaje && (
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[9999] bg-[#4a0a0a] text-white/90 font-vt323 text-2xl px-10 py-3 rounded-md shadow-[0_4px_15px_rgba(0,0,0,0.5)] border border-[#2b0505]">
+          {alertaMensaje}
+        </div>
+      )}
+
       {/* 1. BARRA SUPERIOR FIJA */}
       <div className="absolute top-0 left-0 w-full h-[80px] bg-[#000000cc] border-b border-white/10 flex items-center justify-end px-10 z-50 shadow-[0_4px_30px_rgba(0,0,0,0.8)] backdrop-blur-md">
         <div className="flex items-center gap-4">
@@ -518,7 +549,7 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
                 if (user) {
                   setActiveNavigation('Survey');
                 } else {
-                  alert("⚠️ ACCESO DENEGADO: Necesitas iniciar sesión o registrarte como Operador para acceder al sistema de encuestas.");
+                  mostrarAlerta("No has iniciado sesion.");
                   setActiveModal('signup');
                 }
               }}
