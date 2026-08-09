@@ -564,15 +564,17 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
                 onSubmit={(surveyData) => {
                   const payloadCompleto = {
                     ...surveyData,
-                    item16_imagenes: respuestasMultimedia[16],
-                    item17_imagenes: respuestasMultimedia[17],
-                    item18_imagenes: respuestasMultimedia[18],
-                    item21_videos: respuestasMultimedia[21],
-                    item22_videos: respuestasMultimedia[22],
-                    item23_videos: respuestasMultimedia[23],
-                    item24_audio: respuestasMultimedia[24],
-                    item25_audio: respuestasMultimedia[25],
-                    item26_audio: respuestasMultimedia[26]
+                    item16: respuestasMultimedia[16],
+                    item17: respuestasMultimedia[17],
+                    item18: respuestasMultimedia[18],
+                    item19: respuestasMultimedia[19],
+                    item20: respuestasMultimedia[20],
+                    item21: respuestasMultimedia[21],
+                    item22: respuestasMultimedia[22],
+                    item23: respuestasMultimedia[23],
+                    item24: respuestasMultimedia[24],
+                    item25: respuestasMultimedia[25],
+                    item26: respuestasMultimedia[26]
                   };
                   onSubmitReal(payloadCompleto);
                 }} 

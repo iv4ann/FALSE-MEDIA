@@ -8,7 +8,7 @@ const { Pool } = pg;
 const app = express();
 
 // --- CONFIGURACIÓN ---
-const JWT_SECRET = process.env.JWT_SECRET || 'super_secreto_false_media_123'; // En Render, agrega JWT_SECRET en tus Environment Variables
+const JWT_SECRET = process.env.JWT_SECRET || 'super_secreto_false_media_123'; 
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -40,7 +40,7 @@ const verificarToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   if (!authHeader) return res.status(403).json({ error: 'Token requerido. Inicia sesión.' });
 
-  const token = authHeader.split(' ')[1]; // Formato: "Bearer <token>"
+  const token = authHeader.split(' ')[1]; 
   
   try {
     const decodificado = jwt.verify(token, JWT_SECRET);
@@ -72,13 +72,12 @@ app.post('/api/registro', async (req, res) => {
     const result = await poolPrincipal.query(query, [nombre, email, passwordHash]);
     const nuevoUsuario = result.rows[0];
 
-    // Generar token
     const token = jwt.sign({ id: nuevoUsuario.id_usuario }, JWT_SECRET, { expiresIn: '24h' });
 
     res.status(201).json({ success: true, token, usuario: { id: nuevoUsuario.id_usuario, nombre: nuevoUsuario.nombre, email: nuevoUsuario.email } });
   } catch (error) {
     console.error('Error en registro:', error);
-    if (error.code === '23505') { // Código de error de Postgres para violación de UNIQUE (correo ya existe)
+    if (error.code === '23505') { 
       return res.status(400).json({ error: 'El correo ya está registrado' });
     }
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -136,7 +135,7 @@ app.put('/api/usuario', verificarToken, async (req, res) => {
 // 4. Guardar Encuesta (Vinculada al Usuario)
 app.post('/api/guardar-encuesta', verificarToken, async (req, res) => {
   const datos = req.body;
-  const idUsuario = req.usuario_id; // Viene seguro desde el middleware
+  const idUsuario = req.usuario_id; 
   
   console.log(`📦 Guardando encuesta para el usuario ID: ${idUsuario}`);
 
@@ -149,7 +148,6 @@ app.post('/api/guardar-encuesta', verificarToken, async (req, res) => {
     const reside = datos.resideEnDurango === 'si';
     const idEdad = mapaEdades[datos.item2_edad] || 2;
 
-    // Guardar encuesta principal con la llave foránea id_usuario
     const queryEncuesta = `
       INSERT INTO encuestas (id_usuario, reside_durango, id_rango_edad, dispositivo)
       VALUES ($1, $2, $3, $4)
@@ -160,7 +158,6 @@ app.post('/api/guardar-encuesta', verificarToken, async (req, res) => {
     const resEncuesta = await client.query(queryEncuesta, valoresEncuesta);
     const idEncuestaGenerado = resEncuesta.rows[0].id_encuesta;
 
-    // Bloque 2
     if (reside && datos.item4_frecuencia_tec !== undefined) {
       const queryB2 = `
         INSERT INTO respuestas_bloque_2 
@@ -172,7 +169,6 @@ app.post('/api/guardar-encuesta', verificarToken, async (req, res) => {
       ]);
     }
 
-    // Bloque 3
     if (reside && datos.item10_algoritmos_redes !== undefined) {
       const queryB3 = `
         INSERT INTO respuestas_bloque_3 
@@ -184,20 +180,36 @@ app.post('/api/guardar-encuesta', verificarToken, async (req, res) => {
       ]);
     }
 
-    // Bloque 4 en BD Multimedia
-    if (reside && datos.item16_imagenes !== undefined) {
-      const queryB4 = `
-        INSERT INTO respuestas_multimedia
-        (id_encuesta, respuestas_imagenes, respuestas_videos, respuestas_audios)
-        VALUES ($1, $2, $3, $4);
-      `;
-      const jsonImagenes = JSON.stringify({ item16: datos.item16_imagenes, item17: datos.item17_imagenes, item18: datos.item18_imagenes });
-      const jsonVideos = JSON.stringify({ item21: datos.item21_videos, item22: datos.item22_videos, item23: datos.item23_videos });
-      const jsonAudios = JSON.stringify({ item24: datos.item24_audio, item25: datos.item25_audio, item26: datos.item26_audio });
-      
-      await poolMultimedia.query(queryB4, [idEncuestaGenerado, jsonImagenes, jsonVideos, jsonAudios]);
+    // Bloque 4 en BD Multimedia (Conexión separada)
+    if (reside) {
+      const {
+        item16, item17, item18,
+        item19, item20,
+        item21, item22, item23,
+        item24, item25, item26
+      } = datos;
+
+      if (item16 || item17 || item21 || item24 || item19) {
+          const queryB4 = `
+            INSERT INTO respuestas_multimedia
+            (id_encuesta, item16, item17, item18, item19, item20, item21, item22, item23, item24, item25, item26)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);
+          `;
+          
+          const valoresB4 = [
+            idEncuestaGenerado, 
+            item16 || null, item17 || null, item18 || null,
+            item19 || null, item20 || null,
+            item21 || null, item22 || null, item23 || null,
+            item24 || null, item25 || null, item26 || null
+          ];
+          
+          await poolMultimedia.query(queryB4, valoresB4);
+          console.log(`✅ Respuestas multimedia guardadas para la encuesta ${idEncuestaGenerado}`);
+      }
     }
 
+    // --- AQUÍ FALTABA CERRAR LA TRANSACCIÓN DEL POST CORRECTAMENTE ---
     await client.query('COMMIT');
     res.status(200).json({ success: true, message: 'Encuesta guardada con éxito' });
 
@@ -215,8 +227,6 @@ app.delete('/api/usuario', verificarToken, async (req, res) => {
   const idUsuario = req.usuario_id;
 
   try {
-    // Opcional: Si quieres borrar también sus encuestas o dejar el registro huérfano (depende de tus FK)
-    // Por seguridad, borramos primero las referencias en encuestas o aseguramos CASCADE en la BD.
     await poolPrincipal.query('DELETE FROM encuestas WHERE id_usuario = $1', [idUsuario]);
     const result = await poolPrincipal.query('DELETE FROM usuarios WHERE id_usuario = $1 RETURNING id_usuario;', [idUsuario]);
 
@@ -230,6 +240,7 @@ app.delete('/api/usuario', verificarToken, async (req, res) => {
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
+
 // --- INICIO DEL SERVIDOR ---
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
