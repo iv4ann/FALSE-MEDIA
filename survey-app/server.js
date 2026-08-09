@@ -26,12 +26,12 @@ app.use(express.json());
 
 // --- CONEXIONES A BASES DE DATOS ---
 const poolPrincipal = new Pool({
-  connectionString: 'postgresql://neondb_owner:npg_mtFT5K2DVQvA@ep-shiny-boat-axjw0w6g-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
+  connectionString: 'postgresql://neondb_owner:npg_mtFT5K2DVQvA@ep-shiny-boat-axjw0w6g-pooler.c-4.us-east-2.aws.neon.tech/neondb?uselibpqcompat=true&sslmode=require&channel_binding=require',
   ssl: { rejectUnauthorized: false }
 });
 
 const poolMultimedia = new Pool({
-  connectionString: 'postgresql://neondb_owner:npg_mtFT5K2DVQvA@ep-shiny-boat-axjw0w6g-pooler.c-4.us-east-2.aws.neon.tech/multimedia?sslmode=require&channel_binding=require',
+  connectionString: 'postgresql://neondb_owner:npg_mtFT5K2DVQvA@ep-shiny-boat-axjw0w6g-pooler.c-4.us-east-2.aws.neon.tech/multimedia?uselibpqcompat=true&sslmode=require&channel_binding=require',
   ssl: { rejectUnauthorized: false }
 });
 
@@ -209,7 +209,6 @@ app.post('/api/guardar-encuesta', verificarToken, async (req, res) => {
       }
     }
 
-    // --- AQUÍ FALTABA CERRAR LA TRANSACCIÓN DEL POST CORRECTAMENTE ---
     await client.query('COMMIT');
     res.status(200).json({ success: true, message: 'Encuesta guardada con éxito' });
 
