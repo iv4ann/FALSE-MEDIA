@@ -518,7 +518,14 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
               {['Imagenes', 'Videos', 'Noticias', 'Audios'].map(cat => (
                 <button
                   key={cat}
-                  onClick={() => setActiveNavigation(cat)}
+                  onClick={() => {
+                    if (user) {
+                      setActiveNavigation(cat);
+                    } else {
+                      mostrarAlerta("No has iniciado sesión.");
+                      setActiveModal('signup');
+                    }
+                  }}
                   className={`font-vt323 text-[28px] tracking-widest transition-colors cursor-pointer ${
                     activeNavigation === cat 
                       ? 'text-[#ff3f14] drop-shadow-[0_0_10px_rgba(255,63,20,0.8)] underline underline-offset-8' 
@@ -551,7 +558,25 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
             {activeNavigation === 'Audios' && <Audios respuestas={respuestasMultimedia} setRespuestas={setRespuestasMultimedia} />}
             
             {activeNavigation === 'Survey' && (
-              <Survey participant={user} onEarlyEnd={() => setActiveNavigation(null)} onSubmit={(surveyData) => onSubmitReal(surveyData)} />
+              <Survey 
+                participant={user} 
+                onEarlyEnd={() => setActiveNavigation(null)} 
+                onSubmit={(surveyData) => {
+                  const payloadCompleto = {
+                    ...surveyData,
+                    item16_imagenes: respuestasMultimedia[16],
+                    item17_imagenes: respuestasMultimedia[17],
+                    item18_imagenes: respuestasMultimedia[18],
+                    item21_videos: respuestasMultimedia[21],
+                    item22_videos: respuestasMultimedia[22],
+                    item23_videos: respuestasMultimedia[23],
+                    item24_audio: respuestasMultimedia[24],
+                    item25_audio: respuestasMultimedia[25],
+                    item26_audio: respuestasMultimedia[26]
+                  };
+                  onSubmitReal(payloadCompleto);
+                }} 
+              />
             )}
           </div>
         </main>
@@ -626,7 +651,19 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
               <div className="absolute top-[188px] left-[1025px] w-[586px] h-[349px] rounded-[293px/174.5px] border border-dashed border-white pointer-events-auto" aria-hidden="true" />
               <nav className="absolute top-[660px] left-[390px] w-[724px] h-[57px] flex items-center justify-center gap-[60px] bg-[#ff3f14] rounded-md shadow-[4px_4px_0px_#000000bf] pointer-events-auto">
                 {navigationItems.map((item) => (
-                  <button key={item.label} type="button" className="flex items-center gap-4 font-vt323 font-normal text-white text-2xl tracking-[0] leading-[normal] whitespace-nowrap hover:scale-105 transition-transform cursor-pointer focus-visible:outline-white" onClick={() => setActiveNavigation(item.label)}>
+                  <button 
+                    key={item.label} 
+                    type="button" 
+                    className="flex items-center gap-4 font-vt323 font-normal text-white text-2xl tracking-[0] leading-[normal] whitespace-nowrap hover:scale-105 transition-transform cursor-pointer focus-visible:outline-white" 
+                    onClick={() => {
+                      if (user) {
+                        setActiveNavigation(item.label);
+                      } else {
+                        mostrarAlerta("No has iniciado sesión.");
+                        setActiveModal('signup');
+                      }
+                    }}
+                  >
                     {item.label}
                     <img className="w-[8px] h-[10px]" alt="" src={item.icon} aria-hidden="true" />
                   </button>
@@ -651,7 +688,7 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
                 ACERCA DE<br />NOSOTROS
               </h2>
               <p className="absolute top-[1120px] left-[1050px] w-[330px] m-0 font-vt323 font-normal text-white text-[22px] tracking-[0] leading-[26px]">
-                FALSE-MEDIA nace como una plataforma web y un espacio de concientización diseñado para visibilizar el uso irresponsable de la inteligencia artificial, promoviendo el pensamiento crítico frente a la proliferación masiva de deepfakes, audios sintéticos y noticias alteradas. Nuestro objetivo es examinar cómo la manipulación digital afecta la confianza pública.
+                FALSE-MEDIA nace como una plataforma web y un espacio de concientización diseñado para visibilizar el uso irresponsable de la inteligencia artificial, promoviendo el pensamiento crítico frente a la proliferación masiva de deepfakes, audios sintéticos y noticias alteradas. A través de análisis interactivos, nuestro objetivo es examinar cómo la manipulación digital afecta la confianza pública, la privacidad y la seguridad, ofreciendo a los usuarios herramientas para identificar la desinformación en la red.
               </p>
             </section>
 
