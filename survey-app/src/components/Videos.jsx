@@ -20,13 +20,30 @@ export default function Videos({ respuestas, setRespuestas }) {
     ...videosData.slice(0, activeIndex),
   ];
 
-  const handleAnswer = (ans) => {
+  const handleAnswer = async (ans) => {
     if (userAns) {
       setIntentoCambio(true);
       setTimeout(() => setIntentoCambio(false), 3000);
       return;
     }
+    
     setRespuestas({ ...respuestas, [activeItem.id]: ans });
+
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        await fetch('https://false-media.onrender.com/api/multimedia-clic', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ itemId: activeItem.id, respuesta: ans })
+        });
+      } catch (err) {
+        console.error("Error al guardar en BD:", err);
+      }
+    }
   };
 
   return (
@@ -39,9 +56,7 @@ export default function Videos({ respuestas, setRespuestas }) {
         </div>
 
         <nav className="absolute top-[60px] w-full flex justify-center gap-[120px] z-20">
-          <span className="font-vt323 text-[28px] text-[#ff3f14] tracking-widest drop-shadow-[0_0_10px_rgba(255,63,20,0.8)]">
-            SECCIÓN: VIDEOS
-          </span>
+          <span className="font-vt323 text-[28px] text-[#ff3f14] tracking-widest drop-shadow-[0_0_10px_rgba(255,63,20,0.8)]">SECCIÓN: VIDEOS</span>
         </nav>
 
         <section className="absolute top-[150px] left-[100px] w-[540px] z-20 flex flex-col gap-4">

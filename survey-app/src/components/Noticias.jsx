@@ -19,13 +19,30 @@ export default function Noticias({ respuestas, setRespuestas }) {
     ...noticiasData.slice(0, activeIndex),
   ];
 
-  const handleAnswer = (ans) => {
+  const handleAnswer = async (ans) => {
     if (userAns) {
       setIntentoCambio(true);
       setTimeout(() => setIntentoCambio(false), 3000);
       return;
     }
+    
     setRespuestas({ ...respuestas, [activeItem.id]: ans });
+
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        await fetch('https://false-media.onrender.com/api/multimedia-clic', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ itemId: activeItem.id, respuesta: ans })
+        });
+      } catch (err) {
+        console.error("Error al guardar en BD:", err);
+      }
+    }
   };
 
   return (
@@ -38,9 +55,7 @@ export default function Noticias({ respuestas, setRespuestas }) {
         </div>
 
         <nav className="absolute top-[60px] w-full flex justify-center gap-[120px] z-20">
-          <span className="font-vt323 text-[28px] text-[#ff3f14] tracking-widest drop-shadow-[0_0_10px_rgba(255,63,20,0.8)]">
-            SECCIÓN: NOTICIAS
-          </span>
+          <span className="font-vt323 text-[28px] text-[#ff3f14] tracking-widest drop-shadow-[0_0_10px_rgba(255,63,20,0.8)]">SECCIÓN: NOTICIAS</span>
         </nav>
 
         <section className="absolute top-[150px] left-[100px] w-[540px] z-20 flex flex-col gap-4">
@@ -49,13 +64,8 @@ export default function Noticias({ respuestas, setRespuestas }) {
             <p className="mt-2 font-vt323 text-[20px] leading-[26px] text-gray-300">{activeItem.desc}</p>
           </div>
 
-         {/* Visor Multimedia Activo (Noticias) */}
           <div className="bg-black/80 rounded-xl overflow-hidden flex justify-center items-center h-[210px] border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.8)] backdrop-blur-sm">
-            <img 
-              src={activeItem.url} 
-              alt="Reto" 
-              className="w-[380px] h-[190px] object-cover object-top rounded-md" 
-            />
+            <img src={activeItem.url} alt="Reto" className="w-[380px] h-[190px] object-cover object-top rounded-md" />
           </div>
 
           <div className="w-full">

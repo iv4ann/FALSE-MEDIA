@@ -57,18 +57,13 @@ const verificarToken = (req, res, next) => {
 app.post('/api/registro', async (req, res) => {
   const { nombre, email, password } = req.body;
   
-  if (!nombre || !email || !password) {
-    return res.status(400).json({ error: 'Todos los campos son obligatorios' });
-  }
+  if (!nombre || !email || !password) return res.status(400).json({ error: 'Todos los campos son obligatorios' });
 
   try {
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
-    const query = `
-      INSERT INTO usuarios (nombre, email, password_hash)
-      VALUES ($1, $2, $3) RETURNING id_usuario, nombre, email;
-    `;
+    const query = `INSERT INTO usuarios (nombre, email, password_hash) VALUES ($1, $2, $3) RETURNING id_usuario, nombre, email;`;
     const result = await poolPrincipal.query(query, [nombre, email, passwordHash]);
     const nuevoUsuario = result.rows[0];
 
@@ -76,10 +71,7 @@ app.post('/api/registro', async (req, res) => {
 
     res.status(201).json({ success: true, token, usuario: { id: nuevoUsuario.id_usuario, nombre: nuevoUsuario.nombre, email: nuevoUsuario.email } });
   } catch (error) {
-    console.error('Error en registro:', error);
-    if (error.code === '23505') { 
-      return res.status(400).json({ error: 'El correo ya está registrado' });
-    }
+    if (error.code === '23505') return res.status(400).json({ error: 'El correo ya está registrado' });
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
@@ -90,22 +82,17 @@ app.post('/api/login', async (req, res) => {
 
   try {
     const result = await poolPrincipal.query('SELECT * FROM usuarios WHERE email = $1', [email]);
-    if (result.rows.length === 0) {
-      return res.status(401).json({ error: 'Credenciales incorrectas' });
-    }
+    if (result.rows.length === 0) return res.status(401).json({ error: 'Credenciales incorrectas' });
 
     const usuario = result.rows[0];
     const passwordValida = await bcrypt.compare(password, usuario.password_hash);
 
-    if (!passwordValida) {
-      return res.status(401).json({ error: 'Credenciales incorrectas' });
-    }
+    if (!passwordValida) return res.status(401).json({ error: 'Credenciales incorrectas' });
 
     const token = jwt.sign({ id: usuario.id_usuario }, JWT_SECRET, { expiresIn: '24h' });
 
     res.status(200).json({ success: true, token, usuario: { id: usuario.id_usuario, nombre: usuario.nombre, email: usuario.email } });
   } catch (error) {
-    console.error('Error en login:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
@@ -115,30 +102,49 @@ app.post('/api/login', async (req, res) => {
 // 3. Actualizar Información del Usuario
 app.put('/api/usuario', verificarToken, async (req, res) => {
   const { nombre } = req.body;
-  const idUsuario = req.usuario_id;
-
-  if (!nombre) {
-    return res.status(400).json({ error: 'El nombre es obligatorio para actualizar' });
-  }
+  if (!nombre) return res.status(400).json({ error: 'El nombre es obligatorio para actualizar' });
 
   try {
     const query = 'UPDATE usuarios SET nombre = $1 WHERE id_usuario = $2 RETURNING id_usuario, nombre, email;';
-    const result = await poolPrincipal.query(query, [nombre, idUsuario]);
-    
+    const result = await poolPrincipal.query(query, [nombre, req.usuario_id]);
     res.status(200).json({ success: true, mensaje: 'Perfil actualizado', usuario: result.rows[0] });
   } catch (error) {
-    console.error('Error actualizando usuario:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 
-// 4. Guardar Encuesta (Vinculada al Usuario)
+// 4. GUARDADO INSTANTÁNEO MULTIMEDIA (NUEVA RUTA PARA LOS CLICS)
+app.post('/api/multimedia-clic', verificarToken, async (req, res) => {
+  const { itemId, respuesta } = req.body;
+  const idUsuario = req.usuario_id;
+  const columna = `item${itemId}`;
+  
+  // Seguridad: Validamos que la columna exista para evitar inyección SQL
+  const columnasValidas = ['item16','item17','item18','item19','item20','item21','item22','item23','item24','item25','item26'];
+  if (!columnasValidas.includes(columna)) {
+    return res.status(400).json({error: 'Item inválido'});
+  }
+
+  try {
+    // Hace un "Upsert": Si el usuario no existe en la tabla, lo inserta. Si ya existe, actualiza la columna del ítem.
+    const query = `
+      INSERT INTO respuestas_multimedia (id_usuario, ${columna}) 
+      VALUES ($1, $2) 
+      ON CONFLICT (id_usuario) 
+      DO UPDATE SET ${columna} = EXCLUDED.${columna};
+    `;
+    await poolMultimedia.query(query, [idUsuario, respuesta]);
+    res.status(200).json({ success: true, message: `Guardado en ${columna}` });
+  } catch (error) {
+    console.error('Error al guardar clic multimedia:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// 5. Guardar Encuesta Final (Vinculada al Usuario)
 app.post('/api/guardar-encuesta', verificarToken, async (req, res) => {
   const datos = req.body;
   const idUsuario = req.usuario_id; 
-  
-  console.log(`📦 Guardando encuesta para el usuario ID: ${idUsuario}`);
-
   const client = await poolPrincipal.connect();
 
   try {
@@ -148,100 +154,53 @@ app.post('/api/guardar-encuesta', verificarToken, async (req, res) => {
     const reside = datos.resideEnDurango === 'si';
     const idEdad = mapaEdades[datos.item2_edad] || 2;
 
-    const queryEncuesta = `
-      INSERT INTO encuestas (id_usuario, reside_durango, id_rango_edad, dispositivo)
-      VALUES ($1, $2, $3, $4)
-      RETURNING id_encuesta;
-    `;
-    const valoresEncuesta = [idUsuario, reside, idEdad, datos.item3_dispositivo || 'Smartphone'];
-
-    const resEncuesta = await client.query(queryEncuesta, valoresEncuesta);
+    const queryEncuesta = `INSERT INTO encuestas (id_usuario, reside_durango, id_rango_edad, dispositivo) VALUES ($1, $2, $3, $4) RETURNING id_encuesta;`;
+    const resEncuesta = await client.query(queryEncuesta, [idUsuario, reside, idEdad, datos.item3_dispositivo || 'Smartphone']);
     const idEncuestaGenerado = resEncuesta.rows[0].id_encuesta;
 
     if (reside && datos.item4_frecuencia_tec !== undefined) {
-      const queryB2 = `
-        INSERT INTO respuestas_bloque_2 
-        (id_encuesta, item4_frecuencia_tec, item5_familiaridad_ia, item6_confianza_id, item7_frec_noticias, item8_verif_fuentes, item9_impacto_falsos)
-        VALUES ($1, $2, $3, $4, $5, $6, $7);
-      `;
-      await client.query(queryB2, [
-        idEncuestaGenerado, datos.item4_frecuencia_tec, datos.item5_familiaridad_ia, datos.item6_confianza_identificar, datos.item7_frecuencia_noticias, datos.item8_verificacion_fuentes, datos.item9_impacto_falsos,
-      ]);
+      await client.query(`INSERT INTO respuestas_bloque_2 (id_encuesta, item4_frecuencia_tec, item5_familiaridad_ia, item6_confianza_id, item7_frec_noticias, item8_verif_fuentes, item9_impacto_falsos) VALUES ($1, $2, $3, $4, $5, $6, $7);`, 
+      [idEncuestaGenerado, datos.item4_frecuencia_tec, datos.item5_familiaridad_ia, datos.item6_confianza_identificar, datos.item7_frecuencia_noticias, datos.item8_verificacion_fuentes, datos.item9_impacto_falsos]);
     }
 
     if (reside && datos.item10_algoritmos_redes !== undefined) {
-      const queryB3 = `
-        INSERT INTO respuestas_bloque_3 
-        (id_encuesta, item10_algoritmos_redes, item11_uso_ia_prod, item12_dependencia, item13_regulacion_ia, item14_privacidad, item15_reemplazo_lab)
-        VALUES ($1, $2, $3, $4, $5, $6, $7);
-      `;
-      await client.query(queryB3, [
-        idEncuestaGenerado, datos.item10_algoritmos_redes, datos.item11_uso_ia_productividad, datos.item12_dependencia_ansiedad, datos.item13_regulacion_leyes, datos.item14_privacidad_datos, datos.item15_reemplazo_laboral,
-      ]);
+      await client.query(`INSERT INTO respuestas_bloque_3 (id_encuesta, item10_algoritmos_redes, item11_uso_ia_prod, item12_dependencia, item13_regulacion_ia, item14_privacidad, item15_reemplazo_lab) VALUES ($1, $2, $3, $4, $5, $6, $7);`, 
+      [idEncuestaGenerado, datos.item10_algoritmos_redes, datos.item11_uso_ia_productividad, datos.item12_dependencia_ansiedad, datos.item13_regulacion_leyes, datos.item14_privacidad_datos, datos.item15_reemplazo_laboral]);
     }
 
-    // Bloque 4 en BD Multimedia (Conexión separada)
+    // Como los clics ya se guardaron instantáneamente arriba, aquí solo actualizamos la fila para meterle el ID de la encuesta final
     if (reside) {
-      const {
-        item16, item17, item18,
-        item19, item20,
-        item21, item22, item23,
-        item24, item25, item26
-      } = datos;
-
-      if (item16 || item17 || item21 || item24 || item19) {
-          const queryB4 = `
-            INSERT INTO respuestas_multimedia
-            (id_encuesta, item16, item17, item18, item19, item20, item21, item22, item23, item24, item25, item26)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);
-          `;
-          
-          const valoresB4 = [
-            idEncuestaGenerado, 
-            item16 || null, item17 || null, item18 || null,
-            item19 || null, item20 || null,
-            item21 || null, item22 || null, item23 || null,
-            item24 || null, item25 || null, item26 || null
-          ];
-          
-          await poolMultimedia.query(queryB4, valoresB4);
-          console.log(`✅ Respuestas multimedia guardadas para la encuesta ${idEncuestaGenerado}`);
-      }
+      const queryUpdateB4 = `UPDATE respuestas_multimedia SET id_encuesta = $1 WHERE id_usuario = $2;`;
+      await poolMultimedia.query(queryUpdateB4, [idEncuestaGenerado, idUsuario]);
     }
 
     await client.query('COMMIT');
-    res.status(200).json({ success: true, message: 'Encuesta guardada con éxito' });
+    res.status(200).json({ success: true, message: 'Encuesta completada con éxito' });
 
   } catch (error) {
     await client.query('ROLLBACK');
-    console.error('❌ Error al procesar la encuesta:', error);
     res.status(500).json({ success: false, error: 'Error interno del servidor' });
   } finally {
     client.release();
   }
 });
 
-// 5. Borrar Cuenta de Usuario
+// 6. Borrar Cuenta de Usuario
 app.delete('/api/usuario', verificarToken, async (req, res) => {
   const idUsuario = req.usuario_id;
-
   try {
     await poolPrincipal.query('DELETE FROM encuestas WHERE id_usuario = $1', [idUsuario]);
     const result = await poolPrincipal.query('DELETE FROM usuarios WHERE id_usuario = $1 RETURNING id_usuario;', [idUsuario]);
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Usuario no encontrado' });
-    }
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
+    
+    // También limpiamos sus respuestas multimedia si borra la cuenta
+    await poolMultimedia.query('DELETE FROM respuestas_multimedia WHERE id_usuario = $1', [idUsuario]);
 
     res.status(200).json({ success: true, mensaje: 'Cuenta eliminada correctamente' });
   } catch (error) {
-    console.error('Error al eliminar usuario:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 
-// --- INICIO DEL SERVIDOR ---
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Jarvis en línea: Servidor corriendo al cien en el puerto ${PORT}`);
-});
+app.listen(PORT, () => console.log(`🚀 Jarvis en línea: Servidor corriendo al cien en el puerto ${PORT}`));
