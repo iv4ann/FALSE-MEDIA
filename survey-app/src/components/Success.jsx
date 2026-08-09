@@ -1,63 +1,65 @@
-import React from 'react'
+import React from 'react';
 
 export default function Success({ onRestart }) {
   return (
-    <div className="w-full max-w-2xl mx-auto bg-gradient-to-br from-slate-900 via-[#131620] to-slate-950 text-white rounded-3xl shadow-2xl border border-slate-800/80 overflow-hidden relative p-8 md:p-14 text-center my-8">
+    <div className="w-full max-w-3xl mx-auto bg-black border-2 border-[#ff3f14] shadow-[8px_8px_0px_#ff3f14,0_0_30px_rgba(255,63,20,0.2)] relative p-8 md:p-12 text-center my-8 font-sans overflow-hidden">
       
-      {/* Luces de fondo (Glows que combinan con el Login) */}
-      <div className="absolute -top-24 -left-24 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      {/* Efecto Scanlines Retro */}
+      <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_4px] z-20 opacity-40"></div>
 
-      {/* Esfera decorativa superior */}
-      <div className="absolute top-8 right-10 w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-500 to-yellow-200 shadow-[0_0_25px_rgba(250,204,21,0.5)] border border-yellow-100/40 animate-pulse"></div>
-
-      <div className="relative z-10 max-w-md mx-auto space-y-6">
+      <div className="relative z-30 space-y-8">
         
-        {/* Icono de Check en cubo simulado */}
-        <div className="w-20 h-20 mx-auto bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl border border-amber-500/40 shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex items-center justify-center transform rotate-6">
-          <div className="transform -rotate-6">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-        </div>
-
-        {/* Textos de agradecimiento */}
-        <div>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-yellow-400 bg-yellow-400/10 px-3 py-1 rounded-full border border-yellow-400/20">
+        {/* Encabezado Principal */}
+        <div className="border-b-2 border-[#ff3f14]/50 pb-6">
+          <div className="inline-block bg-[#ff3f14] text-black font-vt323 text-xl px-4 py-1 uppercase tracking-widest shadow-[2px_2px_0px_#ffffff] mb-6">
             Misión Completada
-          </span>
-          <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mt-3 text-white">
-            ¡Respuestas Registradas!
+          </div>
+          <h2 className="text-4xl md:text-5xl font-silkscreen text-white drop-shadow-[0_0_10px_rgba(255,63,20,0.8)]">
+            DATOS TRANSMITIDOS
           </h2>
-          <p className="text-slate-400 text-sm mt-2 leading-relaxed">
-            Tu valiosa participación ha sido guardada en memoria. Estos datos formarán parte del reporte final sobre el consumo de medios y detección de Inteligencia Artificial en Durango.
+          <p className="text-2xl font-vt323 text-[#ff3f14] mt-2 tracking-wide">
+            &gt; CONEXIÓN CERRADA CON ÉXITO_
           </p>
         </div>
 
-        {/* Tarjeta interna informativa */}
-        <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-4 text-xs text-slate-300 text-left flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></div>
-          <span>Los datos han sido procesados de forma 100% anónima de acuerdo a los protocolos de investigación.</span>
+        {/* Cuerpo del Mensaje */}
+        <div className="px-4">
+          <p className="font-vt323 text-white/80 text-xl leading-relaxed">
+            Tu valiosa participación ha sido procesada en los servidores locales. 
+            Estos registros de interacción formarán parte vital del reporte final de 
+            <span className="text-[#ff3f14]"> FALSE-MEDIA </span> 
+            sobre la alfabetización digital y la detección de Inteligencia Artificial en Durango.
+          </p>
         </div>
 
-        {/* Botón en forma de píldora para reiniciar */}
-        <div className="pt-2">
+        {/* Tarjeta de Estado del Sistema */}
+        <div className="bg-white/5 border border-[#ff3f14]/30 p-5 font-vt323 text-xl text-left text-white/60 max-w-lg mx-auto flex flex-col gap-3">
+          <div className="flex items-center gap-3">
+            <span className="w-3 h-3 bg-emerald-500 shadow-[0_0_8px_#10b981] animate-pulse"></span>
+            <span>ESTADO: <span className="text-white">ENCRIPTACIÓN ACTIVA</span></span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="w-3 h-3 bg-emerald-500 shadow-[0_0_8px_#10b981] animate-pulse"></span>
+            <span>PRIVACIDAD: <span className="text-white">100% ANÓNIMO</span></span>
+          </div>
+        </div>
+
+        {/* Botón de Acción Retro */}
+        <div className="pt-6">
           <button
             onClick={onRestart}
-            className="w-full py-4 px-8 rounded-full font-bold text-sm bg-white hover:bg-slate-100 text-slate-950 transition-all duration-300 shadow-xl shadow-white/5 hover:shadow-white/10 transform active:scale-[0.98] cursor-pointer"
+            className="py-3 px-8 bg-transparent border-2 border-[#ff3f14] text-[#ff3f14] font-silkscreen text-xl hover:bg-[#ff3f14] hover:text-white transition-colors duration-300 shadow-[4px_4px_0px_rgba(255,63,20,0.4)] hover:shadow-[4px_4px_0px_#ffffff] cursor-pointer"
           >
-            Registrar una nueva respuesta 🔄
+            [ VOLVER AL INICIO ]
           </button>
         </div>
 
-      </div>
+        {/* Pie de Ventana */}
+        <div className="pt-8 text-sm font-vt323 text-white/30 tracking-widest uppercase">
+          Laboratorio de Investigación Aplicada • UTD TI BIS
+        </div>
 
-      {/* Pie de tarjeta */}
-      <div className="mt-10 pt-6 border-t border-slate-800/80 text-[11px] text-slate-500 uppercase tracking-wider font-semibold">
-        Proyecto Integrador • Laboratorio de Investigación
       </div>
-
     </div>
-  )
+  );
 }
