@@ -710,7 +710,7 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
                 ACERCA DE<br />NOSOTROS
               </h2>
               <p className="absolute top-[1120px] left-[1050px] w-[330px] m-0 font-vt323 font-normal text-white text-[22px] tracking-[0] leading-[26px]">
-                FALSE-MEDIA nace como una plataforma web y un espacio de concientización diseñado para visibilizar el uso irresponsable de la inteligencia artificial, promoviendo el pensamiento crítico frente a la proliferación masiva de deepfakes, audios sintéticos y noticias alteradas. A través de análisis interactivos, nuestro objetivo es examinar cómo la manipulación digital afecta la confianza pública, la privacidad y la seguridad, ofreciendo a los usuarios herramientas para identificar la desinformación en la red.
+                FALSE-MEDIA nace como una plataforma web y un espacio de concientización diseñado para visibilizar el uso irresponsable de la inteligencia artificial, promoviendo el pensamiento crítico frente a la proliferación masiva de deepfakes, audios sintéticos y noticias alteradas. Nuestro objetivo es examinar cómo la manipulación digital afecta la confianza pública.
               </p>
             </section>
 
