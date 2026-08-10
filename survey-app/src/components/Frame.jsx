@@ -118,6 +118,8 @@ const AuthModal = ({ type, onClose, onAuthSuccess }) => {
 
       if (response.ok) {
         localStorage.setItem('token', data.token);
+        // GUARDAMOS EL USUARIO EN LOCALSTORAGE PARA QUE NO SE PIERDA AL RECARGAR
+        localStorage.setItem('user', JSON.stringify(data.usuario));
         onAuthSuccess(data.usuario);
         onClose();
       } else {
@@ -314,7 +316,10 @@ const EditProfileModal = ({ user, onClose, onUpdateSuccess }) => {
       });
       const data = await response.json();
       if (response.ok) {
-        onUpdateSuccess(data.usuario || { ...user, name: name, email: email });
+        const updatedUser = data.usuario || { ...user, name: name, email: email };
+        // ACTUALIZAMOS EL LOCALSTORAGE PARA QUE RECUERDE EL NUEVO NOMBRE AL RECARGAR
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        onUpdateSuccess(updatedUser);
         onClose();
       } else {
         alert(data.error);
@@ -475,7 +480,12 @@ const DeleteProfileModal = ({ user, onClose, onDeleteSuccess, mostrarAlerta }) =
 export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitReal }) => {
   const [activeModal, setActiveModal] = useState(null);
   const [activeNavigation, setActiveNavigation] = useState(null);
-  const [user, setUser] = useState(null);
+  
+  // INICIAMOS EL ESTADO LEYENDO EL LOCALSTORAGE POR SI EL USUARIO RECARGA LA PÁGINA
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
   
   const [alertaMensaje, setAlertaMensaje] = useState(null);
 
@@ -489,6 +499,7 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem('token');
+    localStorage.removeItem('user'); // BORRAMOS EL USUARIO DEL LOCALSTORAGE AL SALIR
     if (activeNavigation === 'Survey') setActiveNavigation(null);
   };
 
@@ -594,6 +605,7 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
             mostrarAlerta={mostrarAlerta}
             onDeleteSuccess={() => { 
               localStorage.removeItem('token'); 
+              localStorage.removeItem('user');
               setUser(null); 
               setActiveNavigation(null); 
               setActiveModal(null);
@@ -690,7 +702,7 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
                 ACERCA DE<br />NOSOTROS
               </h2>
               <p className="absolute top-[1120px] left-[1050px] w-[330px] m-0 font-vt323 font-normal text-white text-[22px] tracking-[0] leading-[26px]">
-                FALSE-MEDIA nace como una plataforma web y un espacio de concientización diseñado para visibilizar el uso irresponsable de la inteligencia artificial, promoviendo el pensamiento crítico frente a la proliferación masiva de deepfakes, audios sintéticos y noticias alteradas. Nuestro objetivo es examinar cómo la manipulación digital afecta la confianza pública.
+                FALSE-MEDIA nace como una plataforma web y un espacio de concientización diseñado para visibilizar el uso irresponsable de la inteligencia artificial, promoviendo el pensamiento crítico frente a la proliferación masiva de deepfakes, audios sintéticos y noticias alteradas. A través de análisis interactivos, nuestro objetivo es examinar cómo la manipulación digital afecta la confianza pública, la privacidad y la seguridad, ofreciendo a los usuarios herramientas para identificar la desinformación en la red.
               </p>
             </section>
 
@@ -762,6 +774,7 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
           mostrarAlerta={mostrarAlerta}
           onDeleteSuccess={() => { 
             localStorage.removeItem('token'); 
+            localStorage.removeItem('user');
             setUser(null); 
             setActiveNavigation(null); 
             setActiveModal(null);

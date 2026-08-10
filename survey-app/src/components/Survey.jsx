@@ -97,19 +97,23 @@ export default function Survey({ participant, onSubmit, onEarlyEnd }) {
     };
 
     const API_URL = 'https://false-media.onrender.com/api/guardar-encuesta';
+    const token = localStorage.getItem('token'); // <-- SACAMOS EL TOKEN
 
     try {
       const response = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` // <-- ENVIAMOS EL TOKEN AL SERVIDOR
+        },
         body: JSON.stringify(datosEncuesta),
       });
 
-      if (!response.ok) throw new Error('No se pudo conectar');
+      if (!response.ok) throw new Error('No se pudo conectar o token inválido');
       console.log("✅ Datos guardados en la nube con éxito");
 
     } catch (err) {
-      console.warn("⚠️ Sin conexión: Guardando en LocalStorage...");
+      console.warn("⚠️ Sin conexión o acceso denegado: Guardando en LocalStorage...", err);
       const pendientes = JSON.parse(localStorage.getItem('encuestas_pendientes') || '[]');
       pendientes.push(datosEncuesta);
       localStorage.setItem('encuestas_pendientes', JSON.stringify(pendientes));
