@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import "../App.css";
 import { Messi } from "./messi";
 import Videos from "./Videos";
 import Noticias from "./Noticias";
@@ -696,8 +697,8 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
               <img className="absolute top-[478px] left-[1221px] w-[131px] h-[131px] object-cover pointer-events-auto" alt="" src={ellipse9} />
               <img className="absolute top-[134px] left-[1221px] w-[131px] h-[131px] object-cover pointer-events-auto" alt="" src={ellipse3} />
               
-              <h1 className="absolute top-[134px] left-[122px] m-0 font-silkscreen font-normal text-white text-[61px] tracking-[0] leading-[73.2px] whitespace-nowrap pointer-events-auto">
-                FALSE MEDIA
+              <h1 className="absolute top-[134px] left-[122px] m-0 font-silkscreen font-normal text-white text-[61px] leading-[73.2px] whitespace-nowrap pointer-events-auto tracking-in-expand">
+              FALSE MEDIA
               </h1>
             </header>
 
