@@ -118,7 +118,6 @@ const AuthModal = ({ type, onClose, onAuthSuccess }) => {
 
       if (response.ok) {
         localStorage.setItem('token', data.token);
-        // GUARDAMOS EL USUARIO EN LOCALSTORAGE PARA QUE NO SE PIERDA AL RECARGAR
         localStorage.setItem('user', JSON.stringify(data.usuario));
         onAuthSuccess(data.usuario);
         onClose();
@@ -267,8 +266,8 @@ const AuthModal = ({ type, onClose, onAuthSuccess }) => {
 // MODAL PARA EDITAR PERFIL
 // ==========================================
 const EditProfileModal = ({ user, onClose, onUpdateSuccess }) => {
-  const [name, setName] = useState(user.name || '');
-  const [email, setEmail] = useState(user.email || '');
+  const [name, setName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -317,7 +316,6 @@ const EditProfileModal = ({ user, onClose, onUpdateSuccess }) => {
       const data = await response.json();
       if (response.ok) {
         const updatedUser = data.usuario || { ...user, name: name, email: email };
-        // ACTUALIZAMOS EL LOCALSTORAGE PARA QUE RECUERDE EL NUEVO NOMBRE AL RECARGAR
         localStorage.setItem('user', JSON.stringify(updatedUser));
         onUpdateSuccess(updatedUser);
         onClose();
@@ -399,7 +397,7 @@ const DeleteProfileModal = ({ user, onClose, onDeleteSuccess, mostrarAlerta }) =
   const [confirmText, setConfirmText] = useState('');
   const [loading, setLoading] = useState(false);
   
-  const expectedText = `delete ${user.name}`;
+  const expectedText = `delete ${user?.name || 'OPERADOR'}`;
 
   const handleDelete = async (e) => {
     e.preventDefault();
@@ -473,7 +471,6 @@ const DeleteProfileModal = ({ user, onClose, onDeleteSuccess, mostrarAlerta }) =
   );
 };
 
-
 // ==========================================
 // COMPONENTE PRINCIPAL (FRAME)
 // ==========================================
@@ -481,10 +478,19 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
   const [activeModal, setActiveModal] = useState(null);
   const [activeNavigation, setActiveNavigation] = useState(null);
   
-  // INICIAMOS EL ESTADO LEYENDO EL LOCALSTORAGE POR SI EL USUARIO RECARGA LA PÁGINA
+  // INICIAMOS EL ESTADO LEYENDO EL LOCALSTORAGE DE FORMA SEGURA
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('user');
-    return savedUser ? JSON.parse(savedUser) : null;
+    if (savedUser) {
+      try {
+        const parsed = JSON.parse(savedUser);
+        // Normalizamos el nombre para que NUNCA sea undefined y crashee el .toUpperCase()
+        return { name: parsed.nombre || parsed.name || 'Operador', email: parsed.email };
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
   });
   
   const [alertaMensaje, setAlertaMensaje] = useState(null);
@@ -499,7 +505,7 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem('token');
-    localStorage.removeItem('user'); // BORRAMOS EL USUARIO DEL LOCALSTORAGE AL SALIR
+    localStorage.removeItem('user'); 
     if (activeNavigation === 'Survey') setActiveNavigation(null);
   };
 
@@ -552,7 +558,8 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
           <div className="flex items-center gap-4">
             {user && (
               <>
-                <span className="font-vt323 text-[#ff3f14] text-[22px]">[OP: {user.name.toUpperCase()}]</span>
+                {/* Evitamos el crasheo agregando ? y un fallback si no existe el nombre */}
+                <span className="font-vt323 text-[#ff3f14] text-[22px]">[OP: {(user?.name || 'OPERADOR').toUpperCase()}]</span>
                 <button onClick={() => setActiveModal('edit')} className="bg-amber-600 text-white px-3 py-1 rounded font-vt323 text-xl hover:bg-amber-500 cursor-pointer">Modificar</button>
                 <button onClick={() => setActiveModal('delete')} className="bg-red-700 text-white px-3 py-1 rounded font-vt323 text-xl hover:bg-red-600 cursor-pointer">Borrar Cuenta</button>
                 <button onClick={handleLogout} className="bg-white text-black px-4 py-1 rounded font-vt323 text-xl hover:bg-[#ff3f14] hover:text-white cursor-pointer">Desconectar</button>
@@ -595,7 +602,7 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
         </main>
 
         {activeModal === 'edit' && (
-          <EditProfileModal user={user} onClose={() => setActiveModal(null)} onUpdateSuccess={(updated) => setUser({ ...user, name: updated.nombre, email: updated.email })} />
+          <EditProfileModal user={user} onClose={() => setActiveModal(null)} onUpdateSuccess={(updated) => setUser({ ...user, name: updated.nombre || updated.name, email: updated.email })} />
         )}
 
         {activeModal === 'delete' && (
@@ -634,7 +641,8 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
         <div className="flex items-center gap-4">
           {user ? (
             <>
-              <span className="font-vt323 text-[#ff3f14] text-[26px]">[OP: {user.name.toUpperCase()}]</span>
+              {/* Fallback de seguridad en el nombre de la cabecera principal */}
+              <span className="font-vt323 text-[#ff3f14] text-[26px]">[OP: {(user?.name || 'OPERADOR').toUpperCase()}]</span>
               <button onClick={() => setActiveModal('edit')} className="bg-amber-600 text-white px-3 py-1 rounded font-vt323 text-xl hover:bg-amber-500 cursor-pointer">Modificar</button>
               <button onClick={() => setActiveModal('delete')} className="bg-red-700 text-white px-3 py-1 rounded font-vt323 text-xl hover:bg-red-600 cursor-pointer">Borrar Cuenta</button>
               <button onClick={handleLogout} className="bg-white text-black px-5 py-1.5 rounded font-vt323 text-[26px] hover:bg-[#ff3f14] hover:text-white cursor-pointer">Desconectar</button>
@@ -743,7 +751,7 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
                 if (user) {
                   setActiveNavigation('Survey');
                 } else {
-                  mostrarAlerta("No has iniciado sesion.");
+                  mostrarAlerta("No has iniciado sesión.");
                   setActiveModal('signup');
                 }
               }}
@@ -759,12 +767,12 @@ export const Frame = ({ respuestasMultimedia, setRespuestasMultimedia, onSubmitR
         <AuthModal 
           type={activeModal} 
           onClose={() => setActiveModal(null)} 
-          onAuthSuccess={(userData) => setUser({ name: userData.nombre, email: userData.email })} 
+          onAuthSuccess={(userData) => setUser({ name: userData.nombre || userData.name, email: userData.email })} 
         />
       )}
 
       {activeModal === 'edit' && (
-        <EditProfileModal user={user} onClose={() => setActiveModal(null)} onUpdateSuccess={(updated) => setUser({ ...user, name: updated.nombre, email: updated.email })} />
+        <EditProfileModal user={user} onClose={() => setActiveModal(null)} onUpdateSuccess={(updated) => setUser({ ...user, name: updated.nombre || updated.name, email: updated.email })} />
       )}
 
       {activeModal === 'delete' && (
